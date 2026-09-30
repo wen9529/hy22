@@ -22,7 +22,7 @@ dns:
 
 # 节点配置列表 (自动注入完整参数)
 proxies:
-  - name: "Xray-VLESS-IPv4-01"
+  - name: "Xray-VLESS-01"
     type: vless
     server: "62.210.70.194"
     port: 37783
@@ -38,7 +38,7 @@ proxies:
     xhttp-opts:
       path: "/OCrp5Ajs"
       mode: "auto"
-  - name: "Xray-VLESS-IPv4-02"
+  - name: "Xray-VLESS-02"
     type: vless
     server: "62.210.70.194"
     port: 37783
@@ -54,7 +54,39 @@ proxies:
     xhttp-opts:
       path: "/OCrp5Ajs"
       mode: "auto"
-  - name: "Xray-VLESS-IPv6-03"
+  - name: "Xray-VLESS-03"
+    type: vless
+    server: "62.210.70.194"
+    port: 37783
+    uuid: "a289c660-1b12-432b-a06c-c2ae469272b0"
+    udp: true
+    tls: true
+    servername: "www.yahoo.com"
+    client-fingerprint: "chrome"
+    network: xhttp
+    reality-opts:
+      public-key: "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg"
+      short-id: "21569dd6"
+    xhttp-opts:
+      path: "/OCrp5Ajs"
+      mode: "auto"
+  - name: "Xray-VLESS-04"
+    type: vless
+    server: "62.210.70.194"
+    port: 37783
+    uuid: "a289c660-1b12-432b-a06c-c2ae469272b0"
+    udp: true
+    tls: true
+    servername: "www.yahoo.com"
+    client-fingerprint: "chrome"
+    network: xhttp
+    reality-opts:
+      public-key: "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg"
+      short-id: "21569dd6"
+    xhttp-opts:
+      path: "/OCrp5Ajs"
+      mode: "auto"
+  - name: "Xray-VLESS-05"
     type: vless
     server: "2001:bc8:32d7:302::14"
     port: 37783
@@ -70,7 +102,7 @@ proxies:
     xhttp-opts:
       path: "/OCrp5Ajs"
       mode: "auto"
-  - name: "Xray-VLESS-IPv6-04"
+  - name: "Xray-VLESS-06"
     type: vless
     server: "2001:bc8:32d7:302::14"
     port: 37783
@@ -86,99 +118,37 @@ proxies:
     xhttp-opts:
       path: "/OCrp5Ajs"
       mode: "auto"
-  - name: "Hysteria-IPv4-01"
-    type: hysteria
-    server: "62.210.70.191"
-    port: 23556
-    auth-str: "github.com/Alvin9999-newpac/fanqiang"
-    sni: "bing.com"
-    skip-cert-verify: true
-    alpn:
-      - h3
-    protocol: udp
-    up: "11 Mbps"
-    down: "55 Mbps"
-    fast-open: true
-  - name: "Hysteria-IPv4-02"
-    type: hysteria
-    server: "163.172.117.163"
-    port: 36699
-    auth-str: "dongtaiwang.com"
-    sni: "bing.com"
-    skip-cert-verify: true
-    alpn:
-      - h3
-    protocol: udp
-    up: "11 Mbps"
-    down: "55 Mbps"
-    fast-open: true
-  - name: "Hysteria-IPv4-03"
-    type: hysteria
-    server: "62.210.70.191"
-    port: 23556
-    auth-str: "github.com/Alvin9999-newpac/fanqiang"
-    sni: "bing.com"
-    skip-cert-verify: true
-    alpn:
-      - h3
-    protocol: udp
-    up: "11 Mbps"
-    down: "55 Mbps"
-    fast-open: true
-  - name: "Hysteria-IPv4-04"
-    type: hysteria
-    server: "62.210.70.191"
-    port: 23556
-    auth-str: "github.com/Alvin9999-newpac/fanqiang"
-    sni: "bing.com"
-    skip-cert-verify: true
-    alpn:
-      - h3
-    protocol: udp
-    up: "11 Mbps"
-    down: "55 Mbps"
-    fast-open: true
-  - name: "Hysteria-IPv6-05"
-    type: hysteria
-    server: "2a14:7584:d097::a"
-    port: 54177
-    auth-str: "dongtaiwang.com"
-    sni: "apple.com"
-    skip-cert-verify: true
-    alpn:
-      - h3
-    protocol: udp
-    up: "11 Mbps"
-    down: "55 Mbps"
-    fast-open: true
-  - name: "Hysteria-IPv6-06"
-    type: hysteria
-    server: "2a14:7584:d097::a"
-    port: 54177
-    auth-str: "dongtaiwang.com"
-    sni: "apple.com"
-    skip-cert-verify: true
-    alpn:
-      - h3
-    protocol: udp
-    up: "11 Mbps"
-    down: "55 Mbps"
-    fast-open: true
-  - name: "Xray-VLESS-Backup-05"
+  - name: "Xray-VLESS-07"
     type: vless
-    server: "62.210.113.151"
-    port: 45641
-    uuid: "f2d9e117-231c-4946-87d8-2cde2222b85d"
+    server: "2001:bc8:32d7:302::14"
+    port: 37783
+    uuid: "a289c660-1b12-432b-a06c-c2ae469272b0"
     udp: true
     tls: true
-    servername: "www.lovelive-anime.jp"
+    servername: "www.yahoo.com"
     client-fingerprint: "chrome"
     network: xhttp
     reality-opts:
-      public-key: "Nw-FuuCWzFZvQtQbJjDCYJpCKyO8cuvibbTGBeoZRyo"
-      short-id: "1ea5bfb5"
+      public-key: "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg"
+      short-id: "21569dd6"
     xhttp-opts:
-      path: "/SSSuqkzN"
+      path: "/OCrp5Ajs"
+      mode: "auto"
+  - name: "Xray-VLESS-08"
+    type: vless
+    server: "2001:bc8:32d7:302::14"
+    port: 37783
+    uuid: "a289c660-1b12-432b-a06c-c2ae469272b0"
+    udp: true
+    tls: true
+    servername: "www.yahoo.com"
+    client-fingerprint: "chrome"
+    network: xhttp
+    reality-opts:
+      public-key: "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg"
+      short-id: "21569dd6"
+    xhttp-opts:
+      path: "/OCrp5Ajs"
       mode: "auto"
 
 # 策略组配置
@@ -189,17 +159,14 @@ proxy-groups:
       - ♻️ 自动选择
       - ⚖️ 负载均衡
       - DIRECT
-      - "Xray-VLESS-IPv4-01"
-      - "Xray-VLESS-IPv4-02"
-      - "Xray-VLESS-IPv6-03"
-      - "Xray-VLESS-IPv6-04"
-      - "Hysteria-IPv4-01"
-      - "Hysteria-IPv4-02"
-      - "Hysteria-IPv4-03"
-      - "Hysteria-IPv4-04"
-      - "Hysteria-IPv6-05"
-      - "Hysteria-IPv6-06"
-      - "Xray-VLESS-Backup-05"
+      - "Xray-VLESS-01"
+      - "Xray-VLESS-02"
+      - "Xray-VLESS-03"
+      - "Xray-VLESS-04"
+      - "Xray-VLESS-05"
+      - "Xray-VLESS-06"
+      - "Xray-VLESS-07"
+      - "Xray-VLESS-08"
 
   - name: ♻️ 自动选择
     type: url-test
@@ -207,17 +174,14 @@ proxy-groups:
     interval: 300
     tolerance: 50
     proxies:
-      - "Xray-VLESS-IPv4-01"
-      - "Xray-VLESS-IPv4-02"
-      - "Xray-VLESS-IPv6-03"
-      - "Xray-VLESS-IPv6-04"
-      - "Hysteria-IPv4-01"
-      - "Hysteria-IPv4-02"
-      - "Hysteria-IPv4-03"
-      - "Hysteria-IPv4-04"
-      - "Hysteria-IPv6-05"
-      - "Hysteria-IPv6-06"
-      - "Xray-VLESS-Backup-05"
+      - "Xray-VLESS-01"
+      - "Xray-VLESS-02"
+      - "Xray-VLESS-03"
+      - "Xray-VLESS-04"
+      - "Xray-VLESS-05"
+      - "Xray-VLESS-06"
+      - "Xray-VLESS-07"
+      - "Xray-VLESS-08"
 
   - name: ⚖️ 负载均衡
     type: load-balance
@@ -225,17 +189,14 @@ proxy-groups:
     url: http://www.gstatic.com/generate_204
     interval: 300
     proxies:
-      - "Xray-VLESS-IPv4-01"
-      - "Xray-VLESS-IPv4-02"
-      - "Xray-VLESS-IPv6-03"
-      - "Xray-VLESS-IPv6-04"
-      - "Hysteria-IPv4-01"
-      - "Hysteria-IPv4-02"
-      - "Hysteria-IPv4-03"
-      - "Hysteria-IPv4-04"
-      - "Hysteria-IPv6-05"
-      - "Hysteria-IPv6-06"
-      - "Xray-VLESS-Backup-05"
+      - "Xray-VLESS-01"
+      - "Xray-VLESS-02"
+      - "Xray-VLESS-03"
+      - "Xray-VLESS-04"
+      - "Xray-VLESS-05"
+      - "Xray-VLESS-06"
+      - "Xray-VLESS-07"
+      - "Xray-VLESS-08"
 
   - name: 🎯 全球直连
     type: select

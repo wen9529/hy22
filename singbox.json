@@ -2,7 +2,7 @@
   "outbounds": [
     {
       "type": "vless",
-      "tag": "Xray-VLESS-IPv4-01",
+      "tag": "Xray-VLESS-01",
       "server": "62.210.70.194",
       "server_port": 37783,
       "uuid": "a289c660-1b12-432b-a06c-c2ae469272b0",
@@ -28,7 +28,7 @@
     },
     {
       "type": "vless",
-      "tag": "Xray-VLESS-IPv4-02",
+      "tag": "Xray-VLESS-02",
       "server": "62.210.70.194",
       "server_port": 37783,
       "uuid": "a289c660-1b12-432b-a06c-c2ae469272b0",
@@ -54,7 +54,59 @@
     },
     {
       "type": "vless",
-      "tag": "Xray-VLESS-IPv6-03",
+      "tag": "Xray-VLESS-03",
+      "server": "62.210.70.194",
+      "server_port": 37783,
+      "uuid": "a289c660-1b12-432b-a06c-c2ae469272b0",
+      "flow": "",
+      "tls": {
+        "enabled": true,
+        "server_name": "www.yahoo.com",
+        "utls": {
+          "enabled": true,
+          "fingerprint": "chrome"
+        },
+        "reality": {
+          "enabled": true,
+          "public_key": "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg",
+          "short_id": "21569dd6"
+        }
+      },
+      "transport": {
+        "type": "xhttp",
+        "path": "/OCrp5Ajs",
+        "mode": "auto"
+      }
+    },
+    {
+      "type": "vless",
+      "tag": "Xray-VLESS-04",
+      "server": "62.210.70.194",
+      "server_port": 37783,
+      "uuid": "a289c660-1b12-432b-a06c-c2ae469272b0",
+      "flow": "",
+      "tls": {
+        "enabled": true,
+        "server_name": "www.yahoo.com",
+        "utls": {
+          "enabled": true,
+          "fingerprint": "chrome"
+        },
+        "reality": {
+          "enabled": true,
+          "public_key": "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg",
+          "short_id": "21569dd6"
+        }
+      },
+      "transport": {
+        "type": "xhttp",
+        "path": "/OCrp5Ajs",
+        "mode": "auto"
+      }
+    },
+    {
+      "type": "vless",
+      "tag": "Xray-VLESS-05",
       "server": "2001:bc8:32d7:302::14",
       "server_port": 37783,
       "uuid": "a289c660-1b12-432b-a06c-c2ae469272b0",
@@ -80,7 +132,7 @@
     },
     {
       "type": "vless",
-      "tag": "Xray-VLESS-IPv6-04",
+      "tag": "Xray-VLESS-06",
       "server": "2001:bc8:32d7:302::14",
       "server_port": 37783,
       "uuid": "a289c660-1b12-432b-a06c-c2ae469272b0",
@@ -105,130 +157,54 @@
       }
     },
     {
-      "type": "hysteria",
-      "tag": "Hysteria-IPv4-01",
-      "server": "62.210.70.191",
-      "server_port": 23556,
-      "auth_str": "github.com/Alvin9999-newpac/fanqiang",
-      "tls": {
-        "enabled": true,
-        "server_name": "bing.com",
-        "insecure": true,
-        "alpn": [
-          "h3"
-        ]
-      },
-      "up_mbps": 11,
-      "down_mbps": 55
-    },
-    {
-      "type": "hysteria",
-      "tag": "Hysteria-IPv4-02",
-      "server": "163.172.117.163",
-      "server_port": 36699,
-      "auth_str": "dongtaiwang.com",
-      "tls": {
-        "enabled": true,
-        "server_name": "bing.com",
-        "insecure": true,
-        "alpn": [
-          "h3"
-        ]
-      },
-      "up_mbps": 11,
-      "down_mbps": 55
-    },
-    {
-      "type": "hysteria",
-      "tag": "Hysteria-IPv4-03",
-      "server": "62.210.70.191",
-      "server_port": 23556,
-      "auth_str": "github.com/Alvin9999-newpac/fanqiang",
-      "tls": {
-        "enabled": true,
-        "server_name": "bing.com",
-        "insecure": true,
-        "alpn": [
-          "h3"
-        ]
-      },
-      "up_mbps": 11,
-      "down_mbps": 55
-    },
-    {
-      "type": "hysteria",
-      "tag": "Hysteria-IPv4-04",
-      "server": "62.210.70.191",
-      "server_port": 23556,
-      "auth_str": "github.com/Alvin9999-newpac/fanqiang",
-      "tls": {
-        "enabled": true,
-        "server_name": "bing.com",
-        "insecure": true,
-        "alpn": [
-          "h3"
-        ]
-      },
-      "up_mbps": 11,
-      "down_mbps": 55
-    },
-    {
-      "type": "hysteria",
-      "tag": "Hysteria-IPv6-05",
-      "server": "2a14:7584:d097::a",
-      "server_port": 54177,
-      "auth_str": "dongtaiwang.com",
-      "tls": {
-        "enabled": true,
-        "server_name": "apple.com",
-        "insecure": true,
-        "alpn": [
-          "h3"
-        ]
-      },
-      "up_mbps": 11,
-      "down_mbps": 55
-    },
-    {
-      "type": "hysteria",
-      "tag": "Hysteria-IPv6-06",
-      "server": "2a14:7584:d097::a",
-      "server_port": 54177,
-      "auth_str": "dongtaiwang.com",
-      "tls": {
-        "enabled": true,
-        "server_name": "apple.com",
-        "insecure": true,
-        "alpn": [
-          "h3"
-        ]
-      },
-      "up_mbps": 11,
-      "down_mbps": 55
-    },
-    {
       "type": "vless",
-      "tag": "Xray-VLESS-Backup-05",
-      "server": "62.210.113.151",
-      "server_port": 45641,
-      "uuid": "f2d9e117-231c-4946-87d8-2cde2222b85d",
+      "tag": "Xray-VLESS-07",
+      "server": "2001:bc8:32d7:302::14",
+      "server_port": 37783,
+      "uuid": "a289c660-1b12-432b-a06c-c2ae469272b0",
       "flow": "",
       "tls": {
         "enabled": true,
-        "server_name": "www.lovelive-anime.jp",
+        "server_name": "www.yahoo.com",
         "utls": {
           "enabled": true,
           "fingerprint": "chrome"
         },
         "reality": {
           "enabled": true,
-          "public_key": "Nw-FuuCWzFZvQtQbJjDCYJpCKyO8cuvibbTGBeoZRyo",
-          "short_id": "1ea5bfb5"
+          "public_key": "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg",
+          "short_id": "21569dd6"
         }
       },
       "transport": {
         "type": "xhttp",
-        "path": "/SSSuqkzN",
+        "path": "/OCrp5Ajs",
+        "mode": "auto"
+      }
+    },
+    {
+      "type": "vless",
+      "tag": "Xray-VLESS-08",
+      "server": "2001:bc8:32d7:302::14",
+      "server_port": 37783,
+      "uuid": "a289c660-1b12-432b-a06c-c2ae469272b0",
+      "flow": "",
+      "tls": {
+        "enabled": true,
+        "server_name": "www.yahoo.com",
+        "utls": {
+          "enabled": true,
+          "fingerprint": "chrome"
+        },
+        "reality": {
+          "enabled": true,
+          "public_key": "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg",
+          "short_id": "21569dd6"
+        }
+      },
+      "transport": {
+        "type": "xhttp",
+        "path": "/OCrp5Ajs",
         "mode": "auto"
       }
     }

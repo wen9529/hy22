@@ -178,11 +178,10 @@ export default function App() {
     const extracted = extractUrlsFromText(SAMPLE_BAT_CONTENT);
     setUrlItems(extracted);
 
-    // Initial Xray preview
+    // Initial Xray preview (8 nodes)
     const sampleObj = JSON.parse(SAMPLE_XRAY_JSON);
     const sampleResults: FetchResult[] = extracted.map((item, idx) => {
-      const isV6 = idx === 2 || idx === 3;
-      const isCustom = idx === 4;
+      const isV6 = idx >= 4;
       const sampleJson = {
         ...sampleObj,
         outbounds: [
@@ -190,22 +189,22 @@ export default function App() {
             ...sampleObj.outbounds[0],
             settings: {
               vnext: [{
-                address: isCustom ? '62.210.113.151' : isV6 ? '2001:bc8:32d7:302::14' : '62.210.70.194',
-                port: isCustom ? 45641 : 37783,
-                users: [{ id: isCustom ? 'f2d9e117-231c-4946-87d8-2cde2222b85d' : 'a289c660-1b12-432b-a06c-c2ae469272b0' }]
+                address: isV6 ? '2001:bc8:32d7:302::14' : '62.210.70.194',
+                port: 37783,
+                users: [{ id: 'a289c660-1b12-432b-a06c-c2ae469272b0' }]
               }]
             }
           },
           ...sampleObj.outbounds.slice(1)
         ]
       };
-      const proxy = convertXrayToClashProxy(sampleJson, item.name);
+      const proxy = convertXrayToClashProxy(sampleJson, `Xray-VLESS-${String(idx + 1).padStart(2, '0')}`);
       return {
         id: item.id,
-        name: item.name,
+        name: `Xray-VLESS-${String(idx + 1).padStart(2, '0')}`,
         success: true,
         activeUrl: item.primaryUrl,
-        isMirror: false,
+        isMirror: idx % 2 === 1,
         data: sampleJson,
         parsedProxy: proxy || undefined,
         uri: proxy ? generateVlessUri(proxy) : undefined,
