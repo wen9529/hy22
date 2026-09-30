@@ -30,35 +30,33 @@ import {
 } from './utils/nodeConverter';
 
 const WORKFLOW_YAML_CONTENT = `# ==============================================================================
-# GitHub Actions 定时更新工作流
-# 在 GitHub 网页上新建文件：.github/workflows/update-nodes.yml
+# GitHub Actions 自动更新工作流 (.github/workflows/update-nodes.yml)
+# 只要项目有任何文件更新即自动触发，同时每 6 小时自动运行并刷新全球 CDN 缓存
 # ==============================================================================
 
-name: 自动提取节点并生成 Clash 订阅
+name: 自动提取节点并生成全套订阅
 
 on:
+  push:
+    branches:
+      - main
+      - master
   schedule:
-    # 按照设定时间定时运行 (每 6 小时自动运行一次)
     - cron: '0 */6 * * *'
-  workflow_dispatch: # 支持在 GitHub 仓库 Actions 页面手动点击运行
+  workflow_dispatch:
     inputs:
       force_update:
         description: '强制更新并提交 (即使节点无变化)'
         required: false
         type: boolean
         default: false
-  push:
-    paths:
-      - 'urls.txt'
-      - 'template.yaml'
-      - 'scripts/**'
 
 concurrency:
   group: \${{ github.workflow }}-\${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
-  contents: write # 必须赋予写入权限以提交生成的订阅文件
+  contents: write
 
 jobs:
   update-nodes:
@@ -76,7 +74,7 @@ jobs:
           python-version: '3.11'
           cache: 'pip'
 
-      - name: 安装依赖 (Install Dependencies)
+      - name: 安装运行依赖 (Install Dependencies)
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then
@@ -96,28 +94,31 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           
-          CHANGED_FILES=""
-          if [[ -n $(git status -s clash.yaml) ]]; then
-            CHANGED_FILES="$CHANGED_FILES clash.yaml"
-          fi
-          if [[ -f singbox.json && -n $(git status -s singbox.json) ]]; then
-            CHANGED_FILES="$CHANGED_FILES singbox.json"
-          fi
-          if [[ -f sub.txt && -n $(git status -s sub.txt) ]]; then
-            CHANGED_FILES="$CHANGED_FILES sub.txt"
-          fi
+          # 暂存所有自动生成的订阅与节点文件
+          git add config.yaml config.b64 hy2_config.yaml hy2_config.b64 hy2_links.txt clash.yaml singbox.json sub.txt 2>/dev/null || true
           
-          if [[ -n "$CHANGED_FILES" || "\${{ github.event.inputs.force_update }}" == "true" ]]; then
-            echo "检测到文件变更: $CHANGED_FILES，正在提交..."
-            git add clash.yaml
-            git add singbox.json sub.txt 2>/dev/null || true
-            git commit -m "chore(cron): 自动更新节点配置 [skip ci]"
-            git pull --rebase origin main || true
-            git push origin main
-            echo "提交成功！"
+          BRANCH_NAME=\$(git branch --show-current || echo "main")
+          
+          if [[ -n \$(git status -s) || "\${{ github.event.inputs.force_update }}" == "true" ]]; then
+            echo "检测到文件变更，正在提交并推送..."
+            git commit -m "chore(auto): 自动更新全量节点配置 [skip ci]" || echo "无新修改需要提交"
+            git pull --rebase origin \${BRANCH_NAME} || true
+            git push origin \${BRANCH_NAME}
+            echo "推送至 \${BRANCH_NAME} 分支成功！"
           else
             echo "节点配置与输出文件无变动，跳过提交。"
           fi
+
+      - name: 自动刷新 jsDelivr 全球 CDN 缓存 (Purge CDN Cache)
+        if: success()
+        run: |
+          echo "正在发起全球 jsDelivr 缓存刷新请求..."
+          curl -s "https://purge.jsdelivr.net/gh/\${{ github.repository }}@main/config.yaml" || true
+          curl -s "https://purge.jsdelivr.net/gh/\${{ github.repository }}@main/clash.yaml" || true
+          curl -s "https://purge.jsdelivr.net/gh/\${{ github.repository }}@main/hy2_config.yaml" || true
+          curl -s "https://purge.jsdelivr.net/gh/\${{ github.repository }}@main/hy2_links.txt" || true
+          curl -s "https://purge.jsdelivr.net/gh/\${{ github.repository }}@main/sub.txt" || true
+          echo "jsDelivr 全球 CDN 缓存清理完成，订阅链接已生效！"
 `;
 
 export default function App() {
