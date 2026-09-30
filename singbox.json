@@ -3,13 +3,30 @@
     {
       "type": "hysteria2",
       "tag": "Hysteria2-01",
-      "server": "2001:bc8:32d7:17b::3",
-      "server_port": 22000,
+      "server": "www.838491.xyz",
+      "server_port": 13377,
       "password": "dongtaiwang.com",
       "tls": {
         "enabled": true,
-        "server_name": "www.microsoft.com",
-        "insecure": true,
+        "server_name": "www.838491.xyz",
+        "insecure": false,
+        "alpn": [
+          "h3"
+        ]
+      },
+      "up_mbps": 11,
+      "down_mbps": 55
+    },
+    {
+      "type": "hysteria2",
+      "tag": "Hysteria2-01 [IPv4直连]",
+      "server": "62.210.8.122",
+      "server_port": 13377,
+      "password": "dongtaiwang.com",
+      "tls": {
+        "enabled": true,
+        "server_name": "www.838491.xyz",
+        "insecure": false,
         "alpn": [
           "h3"
         ]
@@ -20,13 +37,30 @@
     {
       "type": "hysteria2",
       "tag": "Hysteria2-02",
-      "server": "2001:bc8:32d7:17b::3",
-      "server_port": 22000,
+      "server": "www.838491.xyz",
+      "server_port": 13377,
       "password": "dongtaiwang.com",
       "tls": {
         "enabled": true,
-        "server_name": "www.microsoft.com",
-        "insecure": true,
+        "server_name": "www.838491.xyz",
+        "insecure": false,
+        "alpn": [
+          "h3"
+        ]
+      },
+      "up_mbps": 11,
+      "down_mbps": 55
+    },
+    {
+      "type": "hysteria2",
+      "tag": "Hysteria2-02 [IPv4直连]",
+      "server": "62.210.8.122",
+      "server_port": 13377,
+      "password": "dongtaiwang.com",
+      "tls": {
+        "enabled": true,
+        "server_name": "www.838491.xyz",
+        "insecure": false,
         "alpn": [
           "h3"
         ]
@@ -37,13 +71,30 @@
     {
       "type": "hysteria2",
       "tag": "Hysteria2-03",
-      "server": "2001:bc8:32d7:17b::3",
-      "server_port": 22000,
+      "server": "www.838491.xyz",
+      "server_port": 13377,
       "password": "dongtaiwang.com",
       "tls": {
         "enabled": true,
-        "server_name": "www.microsoft.com",
-        "insecure": true,
+        "server_name": "www.838491.xyz",
+        "insecure": false,
+        "alpn": [
+          "h3"
+        ]
+      },
+      "up_mbps": 11,
+      "down_mbps": 55
+    },
+    {
+      "type": "hysteria2",
+      "tag": "Hysteria2-03 [IPv4直连]",
+      "server": "62.210.8.122",
+      "server_port": 13377,
+      "password": "dongtaiwang.com",
+      "tls": {
+        "enabled": true,
+        "server_name": "www.838491.xyz",
+        "insecure": false,
         "alpn": [
           "h3"
         ]
@@ -54,13 +105,30 @@
     {
       "type": "hysteria2",
       "tag": "Hysteria2-04",
-      "server": "2001:bc8:32d7:17b::3",
-      "server_port": 22000,
+      "server": "www.838491.xyz",
+      "server_port": 13377,
       "password": "dongtaiwang.com",
       "tls": {
         "enabled": true,
-        "server_name": "www.microsoft.com",
-        "insecure": true,
+        "server_name": "www.838491.xyz",
+        "insecure": false,
+        "alpn": [
+          "h3"
+        ]
+      },
+      "up_mbps": 11,
+      "down_mbps": 55
+    },
+    {
+      "type": "hysteria2",
+      "tag": "Hysteria2-04 [IPv4直连]",
+      "server": "62.210.8.122",
+      "server_port": 13377,
+      "password": "dongtaiwang.com",
+      "tls": {
+        "enabled": true,
+        "server_name": "www.838491.xyz",
+        "insecure": false,
         "alpn": [
           "h3"
         ]

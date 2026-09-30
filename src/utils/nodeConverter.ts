@@ -81,7 +81,10 @@ export function generateHy2Uri(proxy: ClashProxyItem): string {
   const sni = encodeURIComponent(proxy.sni || proxy.server);
   const tag = encodeURIComponent(proxy.name);
   const insecure = proxy['skip-cert-verify'] ? '1' : '0';
-  return `hy2://${pwd}@${proxy.server}:${proxy.port}/?sni=${sni}&insecure=${insecure}#${tag}`;
+  const hostStr = proxy.server.includes(':') && !proxy.server.startsWith('[')
+    ? `[${proxy.server}]`
+    : proxy.server;
+  return `hy2://${pwd}@${hostStr}:${proxy.port}/?sni=${sni}&insecure=${insecure}#${tag}`;
 }
 
 /**
@@ -115,7 +118,7 @@ export function convertToSingboxOutbounds(proxies: ClashProxyItem[]) {
  * Default Mihomo / Clash Meta YAML Template
  */
 export const DEFAULT_YAML_TEMPLATE = `# -------------------------------------------------------------
-# Clash Meta (Mihomo) 自动订阅配置
+# Clash Meta (Mihomo) 自动订阅配置 (双栈 IPv4 / IPv6 全面优化版)
 # 自动生成时间: {{generated_time}}
 # 节点数量: {{node_count}}
 # -------------------------------------------------------------
@@ -125,11 +128,14 @@ mixed-port: 7890
 allow-lan: false
 mode: rule
 log-level: info
-ipv6: false
+ipv6: true
+unified-delay: true
+tcp-concurrent: true
 external-controller: 127.0.0.1:9090
 
 dns:
   enable: true
+  ipv6: true
   listen: 0.0.0.0:1053
   enhanced-mode: fake-ip
   fake-ip-range: 198.18.0.1/16
@@ -138,6 +144,8 @@ dns:
     - 119.29.29.29
     - 1.1.1.1
     - 8.8.8.8
+    - 2400:3200::1
+    - 2606:4700:4700::1111
 
 # 节点配置列表 (自动注入)
 proxies:
