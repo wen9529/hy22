@@ -12,7 +12,6 @@ export function extractUrlsFromText(rawText: string): UrlItem[] {
   // Clean URLs (strip trailing punctuation or quotes)
   const cleanedUrls = matches.map((u) => u.replace(/[,\s"')]+$/, '').trim());
 
-  // Return each URL as an individual node item (8 URLs = 8 nodes)
   const items: UrlItem[] = [];
   const seenUrls = new Set<string>();
 
@@ -23,10 +22,10 @@ export function extractUrlsFromText(rawText: string): UrlItem[] {
     const idx = items.length + 1;
     items.push({
       id: `node_${idx}`,
-      name: `Hysteria2-${String(idx).padStart(2, '0')}`,
+      name: `Xray-VLESS-${String(idx).padStart(2, '0')}`,
       primaryUrl: url,
       nodeIndex: idx,
-      protocol: 'hysteria2',
+      protocol: 'vless',
     });
   }
 
@@ -37,46 +36,70 @@ export const SAMPLE_BAT_CONTENT = `@echo off
 setlocal
 chcp 936 >nul
 cd /d "%~dp0"
-Title ip1 自动更新 hysteria2 节点
+Title ip1 自动更新 Xray 节点
 
-..\\..\\wget -t 2 --no-hsts --no-check-certificate https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ip/hysteria2/1/config.json
+..\\..\\wget -t 2 --no-hsts --no-check-certificate https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ip/xray/1/config.json
 if exist config.json goto startcopy
 
-..\\..\\wget -t 2 --no-hsts --no-check-certificate https://www.67867867.xyz/Alvin9999/PAC/refs/heads/master/backup/img/1/2/ip/hysteria2/1/config.json
+..\\..\\wget -t 2 --no-hsts --no-check-certificate https://www.67867867.xyz/Alvin9999/PAC/refs/heads/master/backup/img/1/2/ip/xray/1/config.json
 
-..\\..\\wget -t 2 --no-hsts --no-check-certificate https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ip/hysteria2/2/config.json
-..\\..\\wget -t 2 --no-hsts --no-check-certificate https://www.67867867.xyz/Alvin9999/PAC/refs/heads/master/backup/img/1/2/ip/hysteria2/2/config.json
+..\\..\\wget -t 2 --no-hsts --no-check-certificate https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ip/xray/2/config.json
+..\\..\\wget -t 2 --no-hsts --no-check-certificate https://www.67867867.xyz/Alvin9999/PAC/refs/heads/master/backup/img/1/2/ip/xray/2/config.json
 
-..\\..\\wget -t 2 --no-hsts --no-check-certificate https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ip/hysteria2/3/config.json
-..\\..\\wget -t 2 --no-hsts --no-check-certificate https://www.67867867.xyz/Alvin9999/PAC/refs/heads/master/backup/img/1/2/ip/hysteria2/3/config.json
+..\\..\\wget -t 2 --no-hsts --no-check-certificate https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ip/xray/3/config.json
+..\\..\\wget -t 2 --no-hsts --no-check-certificate https://www.67867867.xyz/Alvin9999/PAC/refs/heads/master/backup/img/1/2/ip/xray/3/config.json
 
-..\\..\\wget -t 2 --no-hsts --no-check-certificate https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ip/hysteria2/4/config.json
-..\\..\\wget -t 2 --no-hsts --no-check-certificate https://www.67867867.xyz/Alvin9999/PAC/refs/heads/master/backup/img/1/2/ip/hysteria2/4/config.json
+..\\..\\wget -t 2 --no-hsts --no-check-certificate https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ip/xray/4/config.json
+..\\..\\wget -t 2 --no-hsts --no-check-certificate https://www.67867867.xyz/Alvin9999/PAC/refs/heads/master/backup/img/1/2/ip/xray/4/config.json
 `;
 
-export const SAMPLE_HYSTERIA2_JSON = `{
-  "server": "62.210.70.191:22000",
-  "auth": "dongtaiwang.com",
-  "bandwidth": {
-    "up": "11 mbps",
-    "down": "55 mbps"
-  },
-  "tls": {
-    "sni": "www.microsoft.com",
-    "insecure": true
-  },
-  "quic": {
-    "initStreamReceiveWindow": 16777216,
-    "maxStreamReceiveWindow": 16777216,
-    "initConnReceiveWindow": 33554432,
-    "maxConnReceiveWindow": 33554432
-  },
-  "socks5": {
-    "listen": "127.0.0.1:1080"
-  },
-  "transport": {
-    "udp": {
-      "hopInterval": "30s"
+export const SAMPLE_XRAY_JSON = `{
+  "log": { "loglevel": "warning" },
+  "inbounds": [
+    {
+      "tag": "socks",
+      "port": 1080,
+      "listen": "127.0.0.1",
+      "protocol": "socks",
+      "settings": { "auth": "noauth", "udp": true }
+    },
+    {
+      "tag": "http",
+      "port": 1081,
+      "listen": "127.0.0.1",
+      "protocol": "http",
+      "settings": { "auth": "noauth" }
     }
-  }
+  ],
+  "outbounds": [
+    {
+      "tag": "proxy",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [{
+          "address": "62.210.70.194",
+          "port": 37783,
+          "users": [{
+            "id": "a289c660-1b12-432b-a06c-c2ae469272b0"
+          }]
+        }]
+      },
+      "streamSettings": {
+        "network": "xhttp",
+        "security": "reality",
+        "realitySettings": {
+          "serverName": "www.yahoo.com",
+          "fingerprint": "chrome",
+          "publicKey": "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg",
+          "shortId": "21569dd6"
+        },
+        "xhttpSettings": {
+          "path": "/OCrp5Ajs",
+          "mode": "auto"
+        }
+      }
+    },
+    { "tag": "direct", "protocol": "freedom" },
+    { "tag": "block", "protocol": "blackhole" }
+  ]
 }`;

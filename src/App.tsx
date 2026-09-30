@@ -4,7 +4,6 @@ import {
   ExternalLink,
   Copy,
   Check,
-  Play,
   RefreshCw,
   FileCode,
   ShieldCheck,
@@ -15,23 +14,22 @@ import {
   GitBranch,
   AlertTriangle,
 } from 'lucide-react';
-import * as yaml from 'js-yaml';
 import { UrlItem, FetchResult, ClashProxyItem } from './types';
 import {
   extractUrlsFromText,
   SAMPLE_BAT_CONTENT,
-  SAMPLE_HYSTERIA2_JSON,
+  SAMPLE_XRAY_JSON,
 } from './utils/urlParser';
 import {
   DEFAULT_YAML_TEMPLATE,
-  convertHysteria2ToClashProxy,
-  generateHy2Uri,
+  convertXrayToClashProxy,
+  generateVlessUri,
   renderYamlConfig,
 } from './utils/nodeConverter';
 
 const WORKFLOW_YAML_CONTENT = `# ==============================================================================
 # GitHub Actions 自动更新工作流 (.github/workflows/update-nodes.yml)
-# 只要项目有任何文件更新即自动触发，同时每 6 小时自动运行并刷新全球 CDN 缓存
+# 只要项目有任何文件更新即自动触发，同时每周定时自动运行一次并刷新全球 CDN 缓存
 # ==============================================================================
 
 name: 自动提取节点并生成全套订阅
@@ -42,7 +40,7 @@ on:
       - main
       - master
   schedule:
-    - cron: '0 */6 * * *'
+    - cron: '0 0 * * 0'
   workflow_dispatch:
     inputs:
       force_update:
@@ -94,14 +92,17 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           
-          # 暂存所有自动生成的订阅与节点文件
-          git add config.yaml config.b64 hy2_config.yaml hy2_config.b64 hy2_links.txt clash.yaml singbox.json sub.txt 2>/dev/null || true
+          # 暂存所有自动生成的 Xray 订阅与节点文件
+          git add config.yaml config.b64 clash.yaml xray_config.json xray_links.txt singbox.json sub.txt 2>/dev/null || true
+          
+          # 删除旧版遗留的 hy2 订阅文件
+          git rm -f hy2_config.yaml hy2_config.b64 hy2_links.txt 2>/dev/null || true
           
           BRANCH_NAME=\$(git branch --show-current || echo "main")
           
           if [[ -n \$(git status -s) || "\${{ github.event.inputs.force_update }}" == "true" ]]; then
             echo "检测到文件变更，正在提交并推送..."
-            git commit -m "chore(auto): 自动更新全量节点配置 [skip ci]" || echo "无新修改需要提交"
+            git commit -m "chore(auto): 自动更新全量 Xray 节点配置 [skip ci]" || echo "无新修改需要提交"
             git pull --rebase origin \${BRANCH_NAME} || true
             git push origin \${BRANCH_NAME}
             echo "推送至 \${BRANCH_NAME} 分支成功！"
@@ -115,8 +116,8 @@ jobs:
           echo "正在发起全球 jsDelivr 缓存刷新请求..."
           curl -s "https://purge.jsdelivr.net/gh/\${{ github.repository }}@main/config.yaml" || true
           curl -s "https://purge.jsdelivr.net/gh/\${{ github.repository }}@main/clash.yaml" || true
-          curl -s "https://purge.jsdelivr.net/gh/\${{ github.repository }}@main/hy2_config.yaml" || true
-          curl -s "https://purge.jsdelivr.net/gh/\${{ github.repository }}@main/hy2_links.txt" || true
+          curl -s "https://purge.jsdelivr.net/gh/\${{ github.repository }}@main/xray_config.json" || true
+          curl -s "https://purge.jsdelivr.net/gh/\${{ github.repository }}@main/xray_links.txt" || true
           curl -s "https://purge.jsdelivr.net/gh/\${{ github.repository }}@main/sub.txt" || true
           echo "jsDelivr 全球 CDN 缓存清理完成，订阅链接已生效！"
 `;
@@ -130,40 +131,39 @@ export default function App() {
   const [templateText, setTemplateText] = useState<string>(DEFAULT_YAML_TEMPLATE);
   const [isTesting, setIsTesting] = useState<boolean>(false);
 
-  // GitHub user repo info from runner logs
-  const [githubUser, setGithubUser] = useState<string>('wen9529');
-  const [githubRepo, setGithubRepo] = useState<string>('hy22');
+  const [githubUser] = useState<string>('wen9529');
+  const [githubRepo] = useState<string>('hy22');
   const branch = 'main';
 
   const subLinks = [
     {
-      name: 'Clash Meta 完整订阅 (config.yaml) - jsDelivr CDN ⭐ 首选',
+      name: 'Clash Meta / Karing 完整订阅 (config.yaml) - jsDelivr CDN ⭐ 首选',
       url: `https://fastly.jsdelivr.net/gh/${githubUser}/${githubRepo}@${branch}/config.yaml`,
-      desc: '包含完整分流策略组与规则，国内免翻墙高速拉取。',
+      desc: '包含 VLESS Reality 节点、完整分流策略组与规则，国内免翻墙高速拉取。',
       speed: '极快 (推荐)',
     },
     {
-      name: '纯净 Hysteria 2 订阅 (hy2_config.yaml)',
-      url: `https://fastly.jsdelivr.net/gh/${githubUser}/${githubRepo}@${branch}/hy2_config.yaml`,
-      desc: '仅包含 4 个 Hysteria 2 节点列表，适合作为 proxy-provider 外部引用。',
+      name: '原生 Xray 客户端配置 (xray_config.json)',
+      url: `https://fastly.jsdelivr.net/gh/${githubUser}/${githubRepo}@${branch}/xray_config.json`,
+      desc: '包含 本地 SOCKS(1080) / HTTP(1081) 入站与上游 Reality 代理出站。',
       speed: '极快',
     },
     {
-      name: '通用 Base64 订阅 (sub.txt / hy2_config.b64)',
+      name: '通用 Base64 订阅 (sub.txt)',
       url: `https://fastly.jsdelivr.net/gh/${githubUser}/${githubRepo}@${branch}/sub.txt`,
-      desc: 'Base64 编码，适合 Shadowrocket (小火箭)、v2rayN 一键导入。',
+      desc: 'Base64 编码，适合 Karing、v2rayN、Shadowrocket (小火箭) 一键导入。',
       speed: '通用',
     },
     {
-      name: '原生节点明文清单 (hy2_links.txt)',
-      url: `https://fastly.jsdelivr.net/gh/${githubUser}/${githubRepo}@${branch}/hy2_links.txt`,
-      desc: '每行一个标准 hy2:// 协议链接，方便直接单节点复制。',
+      name: '原生 VLESS 节点明文清单 (xray_links.txt)',
+      url: `https://fastly.jsdelivr.net/gh/${githubUser}/${githubRepo}@${branch}/xray_links.txt`,
+      desc: '每行一个标准 vless:// 协议链接，方便直接单节点复制。',
       speed: '明文',
     },
     {
       name: 'Sing-Box 官方格式 (singbox.json)',
       url: `https://fastly.jsdelivr.net/gh/${githubUser}/${githubRepo}@${branch}/singbox.json`,
-      desc: '原生 Sing-Box outbounds 结构。',
+      desc: '原生 Sing-Box VLESS Reality outbounds 结构。',
       speed: '极快',
     },
     {
@@ -178,15 +178,27 @@ export default function App() {
     const extracted = extractUrlsFromText(SAMPLE_BAT_CONTENT);
     setUrlItems(extracted);
 
-    // Initial node preview
-    const sampleObj = JSON.parse(SAMPLE_HYSTERIA2_JSON);
+    // Initial Xray preview
+    const sampleObj = JSON.parse(SAMPLE_XRAY_JSON);
     const sampleResults: FetchResult[] = extracted.map((item, idx) => {
-      const serverPort = 13370 + (item.nodeIndex || idx + 1);
+      const isV6 = idx >= 2;
       const sampleJson = {
         ...sampleObj,
-        server: `node${idx + 1}.838491.xyz:${serverPort}`,
+        outbounds: [
+          {
+            ...sampleObj.outbounds[0],
+            settings: {
+              vnext: [{
+                address: isV6 ? '2001:bc8:32d7:302::14' : '62.210.70.194',
+                port: 37783,
+                users: [{ id: 'a289c660-1b12-432b-a06c-c2ae469272b0' }]
+              }]
+            }
+          },
+          ...sampleObj.outbounds.slice(1)
+        ]
       };
-      const proxy = convertHysteria2ToClashProxy(sampleJson, item.name);
+      const proxy = convertXrayToClashProxy(sampleJson, item.name);
       return {
         id: item.id,
         name: item.name,
@@ -195,7 +207,7 @@ export default function App() {
         isMirror: false,
         data: sampleJson,
         parsedProxy: proxy || undefined,
-        uri: proxy ? generateHy2Uri(proxy) : undefined,
+        uri: proxy ? generateVlessUri(proxy) : undefined,
       };
     });
     setFetchResults(sampleResults);
@@ -224,7 +236,7 @@ export default function App() {
           const item = urlItems[idx] || { name: `Node-${idx + 1}` };
           let parsedProxy: ClashProxyItem | undefined = undefined;
           if (r.success && r.data && typeof r.data === 'object') {
-            parsedProxy = convertHysteria2ToClashProxy(r.data, item.name) || undefined;
+            parsedProxy = convertXrayToClashProxy(r.data, item.name) || undefined;
           }
           return {
             id: r.id || item.id,
@@ -234,21 +246,32 @@ export default function App() {
             isMirror: Boolean(r.isMirror),
             data: r.data,
             parsedProxy,
-            uri: parsedProxy ? generateHy2Uri(parsedProxy) : undefined,
+            uri: parsedProxy ? generateVlessUri(parsedProxy) : undefined,
           };
         });
         setFetchResults(formatted);
       }
     } catch {
-      // offline simulation fallback
-      const sampleObj = JSON.parse(SAMPLE_HYSTERIA2_JSON);
+      // fallback
+      const sampleObj = JSON.parse(SAMPLE_XRAY_JSON);
       const sampleResults: FetchResult[] = urlItems.map((item, idx) => {
-        const serverPort = 13370 + (item.nodeIndex || idx + 1);
+        const isV6 = idx >= 2;
         const sampleJson = {
           ...sampleObj,
-          server: `node${idx + 1}.838491.xyz:${serverPort}`,
+          outbounds: [
+            {
+              ...sampleObj.outbounds[0],
+              settings: {
+                vnext: [{
+                  address: isV6 ? '2001:bc8:32d7:302::14' : '62.210.70.194',
+                  port: 37783,
+                  users: [{ id: 'a289c660-1b12-432b-a06c-c2ae469272b0' }]
+                }]
+              }
+            }
+          ]
         };
-        const proxy = convertHysteria2ToClashProxy(sampleJson, item.name);
+        const proxy = convertXrayToClashProxy(sampleJson, item.name);
         return {
           id: item.id,
           name: item.name,
@@ -257,7 +280,7 @@ export default function App() {
           isMirror: idx % 2 === 1,
           data: sampleJson,
           parsedProxy: proxy || undefined,
-          uri: proxy ? generateHy2Uri(proxy) : undefined,
+          uri: proxy ? generateVlessUri(proxy) : undefined,
         };
       });
       setFetchResults(sampleResults);
@@ -275,18 +298,18 @@ export default function App() {
       <header className="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="h-9 w-9 rounded-lg bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white shadow-md shadow-cyan-500/20">
+            <div className="h-9 w-9 rounded-lg bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-cyan-500/20">
               <Layers className="h-5 w-5" />
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <span className="font-bold text-white text-base">Hysteria2 节点自动工作流</span>
+                <span className="font-bold text-white text-base">Xray (VLESS Reality) 自动工作流</span>
                 <span className="px-2 py-0.5 rounded text-[10px] bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-mono">
                   {githubUser}/{githubRepo}
                 </span>
               </div>
               <p className="text-xs text-slate-400">
-                GitHub Actions 定时提取 ➔ 主备镜像容灾 ➔ 自动推送订阅
+                GitHub Actions 定时提取 ➔ Xray VLESS Reality ➔ 自动推送全套订阅
               </p>
             </div>
           </div>
@@ -348,10 +371,10 @@ export default function App() {
           <ShieldCheck className="h-5 w-5 text-emerald-400 shrink-0 mt-0.5" />
           <div className="text-xs space-y-1">
             <p className="font-semibold text-white">
-              已将完整 GitHub Actions 自动化工作流与 Python 脚本生成至仓库根目录！
+              已将全套 Xray (VLESS Reality) 自动化转换脚本与工作流部署至仓库！
             </p>
             <p className="text-slate-400 leading-relaxed">
-              请确保在仓库 <strong>Settings ➔ Actions ➔ General ➔ Workflow permissions</strong> 中已选择 <strong>Read and write permissions</strong>，Actions 每 6 小时将自动更新并提交 <code>clash.yaml</code>、<code>singbox.json</code> 和 <code>sub.txt</code>。
+              GitHub Actions 每周将自动同步上游 Xray 节点（且每次向仓库推送文件时也会立即触发），自动提交生成 <code>config.yaml</code>、<code>xray_config.json</code>、<code>xray_links.txt</code> 和 <code>sub.txt</code>。
             </p>
           </div>
         </div>
@@ -402,9 +425,9 @@ export default function App() {
               <div className="flex items-center justify-between">
                 <h3 className="text-xs font-semibold text-slate-300 flex items-center space-x-1.5">
                   <Radio className="h-4 w-4 text-emerald-400" />
-                  <span>已识别节点列表 ({fetchResults.length})</span>
+                  <span>已识别 Xray 节点列表 ({fetchResults.length})</span>
                 </h3>
-                <span className="text-xs text-slate-400">全部支持 Hysteria 2 双镜像容灾</span>
+                <span className="text-xs text-slate-400">支持 VLESS + Reality + XHTTP</span>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -420,7 +443,7 @@ export default function App() {
                           <span className="w-2 h-2 rounded-full bg-emerald-400" />
                           <span className="text-xs font-bold text-white">{node.name}</span>
                           <span className="px-1.5 py-0.2 rounded text-[10px] bg-cyan-500/10 text-cyan-400 font-mono">
-                            Hysteria2
+                            VLESS Reality
                           </span>
                         </div>
                         {node.uri && (
@@ -445,16 +468,16 @@ export default function App() {
                             <span className="truncate block font-semibold">{p.server}:{p.port}</span>
                           </div>
                           <div>
-                            <span className="text-slate-500 block text-[10px]">SNI:</span>
-                            <span className="truncate block">{p.sni}</span>
+                            <span className="text-slate-500 block text-[10px]">SNI (ServerName):</span>
+                            <span className="truncate block">{p.servername}</span>
                           </div>
                           <div>
-                            <span className="text-slate-500 block text-[10px]">密码/Auth:</span>
-                            <span className="truncate block">{p.password}</span>
+                            <span className="text-slate-500 block text-[10px]">传输模式 (Network):</span>
+                            <span className="truncate block text-cyan-400">{p.network || 'xhttp'}</span>
                           </div>
                           <div>
-                            <span className="text-slate-500 block text-[10px]">下行/上行带宽:</span>
-                            <span className="text-emerald-400 block">{p.down} / {p.up}</span>
+                            <span className="text-slate-500 block text-[10px]">Public Key (公钥):</span>
+                            <span className="truncate block text-slate-400">{p['reality-opts']?.['public-key']}</span>
                           </div>
                         </div>
                       )}
@@ -562,7 +585,7 @@ export default function App() {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-emerald-400">
-                实时渲染的完整 Clash Meta 订阅文件 (clash.yaml)
+                实时渲染的完整 Clash Meta 订阅文件 (config.yaml)
               </span>
               <button
                 onClick={() => handleCopy('yaml_copy', generatedYaml)}

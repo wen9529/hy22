@@ -7,36 +7,55 @@ export interface UrlItem {
   protocol?: string;
 }
 
-export interface Hysteria2RawConfig {
-  server?: string;
-  auth?: string;
-  bandwidth?: {
-    up?: string;
-    down?: string;
+export interface XrayOutboundConfig {
+  tag?: string;
+  protocol?: string;
+  settings?: {
+    vnext?: Array<{
+      address?: string;
+      port?: number;
+      users?: Array<{
+        id?: string;
+        encryption?: string;
+        flow?: string;
+      }>;
+    }>;
   };
-  tls?: {
-    sni?: string;
-    insecure?: boolean;
-    alpn?: string[];
-  };
-  quic?: {
-    initStreamReceiveWindow?: number;
-    maxStreamReceiveWindow?: number;
-    initConnReceiveWindow?: number;
-    maxConnReceiveWindow?: number;
-  };
-  socks5?: {
-    listen?: string;
-  };
-  transport?: {
-    udp?: {
-      hopInterval?: string;
+  streamSettings?: {
+    network?: string;
+    security?: string;
+    realitySettings?: {
+      serverName?: string;
+      fingerprint?: string;
+      publicKey?: string;
+      shortId?: string;
+      spiderX?: string;
+    };
+    tlsSettings?: {
+      serverName?: string;
+      allowInsecure?: boolean;
+    };
+    xhttpSettings?: {
+      path?: string;
+      mode?: string;
+    };
+    wsSettings?: {
+      path?: string;
+      headers?: Record<string, string>;
+    };
+    grpcSettings?: {
+      serviceName?: string;
     };
   };
-  obfs?: {
-    type?: string;
-    password?: string;
-  };
+  [key: string]: any;
+}
+
+export interface XrayRawConfig {
+  log?: { loglevel?: string };
+  dns?: any;
+  inbounds?: any[];
+  outbounds?: XrayOutboundConfig[];
+  routing?: any;
   [key: string]: any;
 }
 
@@ -45,16 +64,32 @@ export interface ClashProxyItem {
   type: string;
   server: string;
   port: number;
+  uuid?: string;
   password?: string;
+  udp?: boolean;
+  tls?: boolean;
+  flow?: string;
+  servername?: string;
+  'client-fingerprint'?: string;
+  network?: string;
+  'reality-opts'?: {
+    'public-key'?: string;
+    'short-id'?: string;
+  };
+  'xhttp-opts'?: {
+    path?: string;
+    mode?: string;
+  };
+  'ws-opts'?: {
+    path?: string;
+    headers?: Record<string, string>;
+  };
+  'grpc-opts'?: {
+    'grpc-service-name'?: string;
+  };
   sni?: string;
   'skip-cert-verify'?: boolean;
   alpn?: string[];
-  up?: string;
-  down?: string;
-  'hop-interval'?: number | string;
-  ports?: string;
-  obfs?: string;
-  'obfs-password'?: string;
   [key: string]: any;
 }
 
@@ -69,15 +104,4 @@ export interface FetchResult {
   parsedProxy?: ClashProxyItem;
   uri?: string;
   latencyMs?: number;
-}
-
-export interface WorkflowOptions {
-  cronSchedule: string;
-  workflowName: string;
-  targetFileName: string;
-  branchName: string;
-  pythonVersion: string;
-  includeSingBox: boolean;
-  autoCommit: boolean;
-  commitMessage: string;
 }

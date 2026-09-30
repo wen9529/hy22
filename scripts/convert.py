@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-GitHub Actions 自动化转换脚本 (全协议多源智能提取版)：
-1. 自动读取 urls.txt 与 urls_hy2.txt，精确提取全部 URL 配置源
-2. 实时支持从 upstream (GitLab & 67867867.xyz 镜像源) 下载真实动态配置：
-   - 支持 YAML 配置 (clash.meta2 IPv4 / IPv6 Hysteria 1 节点)
-   - 支持 JSON 配置 (Hysteria 2 节点)
-3. 完美兼容 Clash Meta (Mihomo)、Sing-Box 与 Karing：
-   - 包含 IPv4 (62.210.70.191、163.172.117.163) 与 IPv6 节点
-   - 自动生成标准 URI 链接与 Base64 订阅
+GitHub Actions 自动化转换脚本 (Xray VLESS Reality 智能提取版)：
+1. 自动读取 urls.txt，精准提取全部 Xray URL 配置源 (支持 GitLab 与镜像源主备容灾)
+2. 实时从 upstream 下载真实动态 Xray 配置：
+   - 提取 VLESS + Reality + XHTTP / TCP 节点
+   - 包含 IPv4 (62.210.70.194) 与 IPv6 节点
+3. 完美兼容 Clash Meta (Mihomo)、Karing、v2rayN、Sing-Box 与 Shadowrocket：
+   - 生成完整 Clash Meta 订阅 (config.yaml / clash.yaml)
+   - 生成原生 Xray 客户端配置 (xray_config.json)
+   - 生成标准 VLESS URI 明文清单 (xray_links.txt)
+   - 生成 Base64 通用订阅 (sub.txt / config.b64)
+   - 生成 Sing-Box 格式配置 (singbox.json)
 """
 
 import os
@@ -21,44 +24,44 @@ import ssl
 from urllib.parse import quote
 import urllib.request
 
-try:
-    import yaml
-    HAS_YAML = True
-except Exception:
-    HAS_YAML = False
-
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 URLS_FILE = os.path.join(BASE_DIR, "urls.txt")
-URLS_HY2_FILE = os.path.join(BASE_DIR, "urls_hy2.txt")
 TEMPLATE_FILE = os.path.join(BASE_DIR, "template.yaml")
 
 CONFIG_YAML = os.path.join(BASE_DIR, "config.yaml")
 CONFIG_B64 = os.path.join(BASE_DIR, "config.b64")
-HY2_CONFIG_YAML = os.path.join(BASE_DIR, "hy2_config.yaml")
-HY2_CONFIG_B64 = os.path.join(BASE_DIR, "hy2_config.b64")
-HY2_LINKS_TXT = os.path.join(BASE_DIR, "hy2_links.txt")
 CLASH_OUTPUT = os.path.join(BASE_DIR, "clash.yaml")
+XRAY_CONFIG_JSON = os.path.join(BASE_DIR, "xray_config.json")
+XRAY_LINKS_TXT = os.path.join(BASE_DIR, "xray_links.txt")
 SINGBOX_OUTPUT = os.path.join(BASE_DIR, "singbox.json")
 SUB_OUTPUT = os.path.join(BASE_DIR, "sub.txt")
+
+# Clean up legacy hy2 artifacts if they exist
+for legacy in ["hy2_config.yaml", "hy2_config.b64", "hy2_links.txt"]:
+    legacy_path = os.path.join(BASE_DIR, legacy)
+    if os.path.exists(legacy_path):
+        try:
+            os.remove(legacy_path)
+        except Exception:
+            pass
 
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
 TIMEOUT = 8
 
-def extract_all_urls(file_paths):
+def extract_all_urls(file_path):
     """从输入文档中按顺序提取全部 URL 链接"""
     urls = []
-    for path in file_paths:
-        if os.path.exists(path):
-            with open(path, "r", encoding="utf-8", errors="ignore") as f:
-                for line in f:
-                    line = line.strip()
-                    if not line or line.startswith("#"):
-                        continue
-                    found = re.findall(r"https?://[^\s\"'<>]+", line)
-                    for u in found:
-                        clean_u = u.rstrip('",\\').strip()
-                        if clean_u and clean_u not in urls:
-                            urls.append(clean_u)
+    if os.path.exists(file_path):
+        with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                found = re.findall(r"https?://[^\s\"'<>]+", line)
+                for u in found:
+                    clean_u = u.rstrip('",\\').strip()
+                    if clean_u and clean_u not in urls:
+                        urls.append(clean_u)
     return urls
 
 def fetch_upstream_content(url):
@@ -76,163 +79,184 @@ def fetch_upstream_content(url):
         print(f"  [-] 请求失败: {e}")
     return None
 
-def parse_yaml_node(content, default_name):
-    """从 Clash YAML 内容中解析出第一个代理节点"""
+def parse_xray_node(content, default_name):
+    """从 Xray config.json 中精准解析 VLESS Reality 节点"""
     if not content:
-        return None, None
-    lines = content.splitlines()
-    in_proxies = False
-    proxy_lines = []
-    for line in lines:
-        if line.strip().startswith("proxies:"):
-            in_proxies = True
-            continue
-        if in_proxies:
-            if line.strip().startswith("proxy-groups:") or (line and not line.startswith(" ") and not line.startswith("-")):
-                break
-            proxy_lines.append(line)
+        return None, None, None
     
-    if not proxy_lines:
-        return None, None
+    try:
+        data = json.loads(content)
+    except Exception as e:
+        print(f"  [-] JSON 解析异常: {e}")
+        return None, None, None
     
-    # 提取字段
-    raw_block = "\n".join(proxy_lines)
-    node_type = "hysteria"
-    if "type: hysteria2" in raw_block:
-        node_type = "hysteria2"
-    elif "type: hysteria" in raw_block:
-        node_type = "hysteria"
-
-    server_m = re.search(r"server:\s*['\"]?([^'\"\s\n]+)", raw_block)
-    port_m = re.search(r"port:\s*(\d+)", raw_block)
-    auth_m = re.search(r"(?:auth-str|auth|password):\s*['\"]?([^'\"\s\n]+)", raw_block)
-    sni_m = re.search(r"sni:\s*['\"]?([^'\"\s\n]+)", raw_block)
-    up_m = re.search(r"up:\s*['\"]?([^'\"\n]+)", raw_block)
-    down_m = re.search(r"down:\s*['\"]?([^'\"\n]+)", raw_block)
-
-    server = server_m.group(1).strip("[]") if server_m else "62.210.70.191"
-    port = int(port_m.group(1)) if port_m else 23556
-    auth = auth_m.group(1) if auth_m else "github.com/Alvin9999-newpac/fanqiang"
-    sni = sni_m.group(1) if sni_m else "bing.com"
-    up = up_m.group(1).strip() if up_m else "11 Mbps"
-    down = down_m.group(1).strip() if down_m else "55 Mbps"
+    outbounds = data.get("outbounds", [])
+    if not outbounds:
+        return None, None, None
+    
+    # 查找主代理 outbound (protocol 为 vless / vmess / trojan 等)
+    proxy_ob = None
+    for ob in outbounds:
+        proto = str(ob.get("protocol", "")).lower()
+        if proto in ["vless", "vmess", "trojan", "shadowsocks"]:
+            proxy_ob = ob
+            break
+    
+    if not proxy_ob:
+        proxy_ob = outbounds[0]
+    
+    proto = str(proxy_ob.get("protocol", "vless")).lower()
+    settings = proxy_ob.get("settings", {})
+    vnext = settings.get("vnext", [])
+    
+    server = "62.210.70.194"
+    port = 37783
+    uuid = "a289c660-1b12-432b-a06c-c2ae469272b0"
+    flow = ""
+    
+    if vnext and isinstance(vnext, list) and len(vnext) > 0:
+        vn0 = vnext[0]
+        server = str(vn0.get("address", server)).strip("[]")
+        port = int(vn0.get("port", port))
+        users = vn0.get("users", [])
+        if users and len(users) > 0:
+            uuid = str(users[0].get("id", uuid))
+            flow = str(users[0].get("flow", ""))
+    
+    stream = proxy_ob.get("streamSettings", {})
+    network = str(stream.get("network", "xhttp")).lower()
+    security = str(stream.get("security", "reality")).lower()
+    
+    reality = stream.get("realitySettings", {})
+    tls_settings = stream.get("tlsSettings", {})
+    
+    sni = reality.get("serverName") or tls_settings.get("serverName") or "www.yahoo.com"
+    public_key = reality.get("publicKey", "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg")
+    short_id = reality.get("shortId", "21569dd6")
+    fingerprint = reality.get("fingerprint", "chrome")
+    
+    xhttp_settings = stream.get("xhttpSettings", {})
+    path = xhttp_settings.get("path", "/OCrp5Ajs")
+    mode = xhttp_settings.get("mode", "auto")
 
     is_ipv6 = ":" in server
     uri_server = f"[{server}]" if is_ipv6 else server
 
-    if node_type == "hysteria":
-        proxy_dict = {
-            "name": default_name,
-            "type": "hysteria",
-            "server": server,
-            "port": port,
-            "auth-str": auth,
-            "sni": sni,
-            "skip-cert-verify": True,
-            "alpn": ["h3"],
-            "protocol": "udp",
-            "up": str(up),
-            "down": str(down),
-            "fast-open": True
-        }
-        uri = f"hysteria://{uri_server}:{port}?auth={quote(auth)}&sni={quote(sni)}&insecure=1&protocol=udp#{quote(default_name)}"
-    else:
-        proxy_dict = {
-            "name": default_name,
-            "type": "hysteria2",
-            "server": server,
-            "port": port,
-            "password": str(auth),
-            "auth": str(auth),
-            "sni": sni,
-            "skip-cert-verify": True,
-            "alpn": ["h3"],
-            "up": str(up),
-            "down": str(down),
-            "fast-open": True
-        }
-        uri = f"hy2://{quote(auth)}@{uri_server}:{port}/?sni={quote(sni)}&insecure=1#{quote(default_name)}"
-
-    return proxy_dict, uri
-
-def parse_json_node(content, default_name):
-    """解析 Hysteria 2 的 JSON 配置"""
-    data = {}
-    try:
-        data = json.loads(content)
-    except Exception:
-        pass
-
-    server_raw = str(data.get("server", "2001:bc8:32d7:17b::3:22000")).strip()
-    auth = data.get("auth") or data.get("password") or "dongtaiwang.com"
-    tls_info = data.get("tls") or {}
-    sni = tls_info.get("sni") or "www.microsoft.com"
-    bandwidth = data.get("bandwidth") or {}
-    up = bandwidth.get("up", "11 mbps")
-    down = bandwidth.get("down", "55 mbps")
-
-    host = "2001:bc8:32d7:17b::3"
-    port = 22000
-    if server_raw.startswith("["):
-        v6_m = re.match(r"^\[(.*?)\]:?(\d+)?$", server_raw)
-        if v6_m:
-            host = v6_m.group(1)
-            port = int(v6_m.group(2)) if v6_m.group(2) else 22000
-    elif ":" in server_raw:
-        parts = server_raw.rsplit(":", 1)
-        host = parts[0].strip("[]")
-        port = int(parts[1]) if parts[1].isdigit() else 22000
-    else:
-        host = server_raw
-        if data.get("port"):
-            port = int(data.get("port"))
-
-    clash_server = host.strip("[]")
-    uri_server = f"[{clash_server}]" if ":" in clash_server else clash_server
-
-    proxy_dict = {
+    # 1. 生成 Clash Meta (Mihomo) & Karing 字典
+    clash_proxy = {
         "name": default_name,
-        "type": "hysteria2",
-        "server": clash_server,
+        "type": "vless",
+        "server": server,
         "port": port,
-        "password": str(auth),
-        "auth": str(auth),
-        "sni": sni,
-        "skip-cert-verify": True,
-        "alpn": ["h3"],
-        "up": str(up),
-        "down": str(down),
-        "fast-open": True
+        "uuid": uuid,
+        "udp": True,
+        "tls": True,
+        "flow": flow,
+        "servername": sni,
+        "client-fingerprint": fingerprint,
+        "network": network,
+        "reality-opts": {
+            "public-key": public_key,
+            "short-id": short_id
+        }
     }
-    uri = f"hy2://{quote(str(auth))}@{uri_server}:{port}/?sni={quote(str(sni))}&insecure=1#{quote(default_name)}"
-    return proxy_dict, uri
+    
+    if network == "xhttp":
+        clash_proxy["xhttp-opts"] = {
+            "path": path,
+            "mode": mode
+        }
+    elif network == "ws":
+        clash_proxy["ws-opts"] = {
+            "path": path,
+            "headers": {"Host": sni}
+        }
+    elif network == "grpc":
+        clash_proxy["grpc-opts"] = {
+            "grpc-service-name": stream.get("grpcSettings", {}).get("serviceName", "")
+        }
+
+    # 2. 生成标准 VLESS URI 链接
+    query_parts = [
+        f"type={quote(network)}",
+        f"security={quote(security)}",
+        f"pbk={quote(public_key)}",
+        f"fp={quote(fingerprint)}",
+        f"sni={quote(sni)}",
+        f"sid={quote(short_id)}",
+    ]
+    if flow:
+        query_parts.append(f"flow={quote(flow)}")
+    if network == "xhttp":
+        query_parts.append(f"path={quote(path)}")
+        query_parts.append(f"mode={quote(mode)}")
+    elif network == "ws":
+        query_parts.append(f"path={quote(path)}")
+    
+    uri = f"vless://{uuid}@{uri_server}:{port}?" + "&".join(query_parts) + f"#{quote(default_name)}"
+
+    # 3. 生成 Sing-Box 结构
+    singbox_node = {
+        "type": "vless",
+        "tag": default_name,
+        "server": server,
+        "server_port": port,
+        "uuid": uuid,
+        "flow": flow,
+        "tls": {
+            "enabled": True,
+            "server_name": sni,
+            "utls": {
+                "enabled": True,
+                "fingerprint": fingerprint
+            },
+            "reality": {
+                "enabled": True,
+                "public_key": public_key,
+                "short_id": short_id
+            }
+        }
+    }
+    if network == "xhttp":
+        singbox_node["transport"] = {
+            "type": "xhttp",
+            "path": path,
+            "mode": mode
+        }
+
+    return clash_proxy, uri, singbox_node
 
 def dump_yaml_proxies(proxies):
+    """将代理列表序列化为高兼容 YAML 格式 (完全兼容 Clash Meta 与 Karing)"""
     lines = []
     for p in proxies:
         lines.append(f"  - name: \"{p['name']}\"")
         lines.append(f"    type: {p['type']}")
         lines.append(f"    server: \"{p['server']}\"")
         lines.append(f"    port: {p['port']}")
-        if p.get("auth-str"):
-            lines.append(f"    auth-str: \"{p['auth-str']}\"")
-        if p.get("password"):
-            lines.append(f"    password: \"{p['password']}\"")
-        if p.get("auth"):
-            lines.append(f"    auth: \"{p['auth']}\"")
-        lines.append(f"    sni: \"{p['sni']}\"")
-        lines.append(f"    skip-cert-verify: true")
-        lines.append("    alpn:")
-        for a in p.get("alpn", ["h3"]):
-            lines.append(f"      - {a}")
-        if p.get("protocol"):
-            lines.append(f"    protocol: {p['protocol']}")
-        lines.append(f"    up: \"{p['up']}\"")
-        lines.append(f"    down: \"{p['down']}\"")
-        lines.append(f"    fast-open: true")
+        lines.append(f"    uuid: \"{p['uuid']}\"")
+        lines.append(f"    udp: true")
+        lines.append(f"    tls: true")
+        if p.get("flow"):
+            lines.append(f"    flow: \"{p['flow']}\"")
+        lines.append(f"    servername: \"{p.get('servername', 'www.yahoo.com')}\"")
+        lines.append(f"    client-fingerprint: \"{p.get('client-fingerprint', 'chrome')}\"")
+        lines.append(f"    network: {p.get('network', 'xhttp')}")
+        
+        if "reality-opts" in p:
+            lines.append("    reality-opts:")
+            lines.append(f"      public-key: \"{p['reality-opts'].get('public-key', '')}\"")
+            lines.append(f"      short-id: \"{p['reality-opts'].get('short-id', '')}\"")
+            
+        if "xhttp-opts" in p:
+            lines.append("    xhttp-opts:")
+            lines.append(f"      path: \"{p['xhttp-opts'].get('path', '/OCrp5Ajs')}\"")
+            lines.append(f"      mode: \"{p['xhttp-opts'].get('mode', 'auto')}\"")
+            
     return "\n".join(lines)
 
 def render_template(template_str, proxies):
+    """渲染完整的 Clash Meta 策略组与分流规则"""
     if not proxies:
         return template_str.replace("{{proxies}}", "  # 暂无可用节点\n").replace("{{proxy_names_indented}}", "      - DIRECT")
 
@@ -250,171 +274,175 @@ def render_template(template_str, proxies):
 
 def main():
     print("=" * 65)
-    print("🚀 开始运行 GitHub 真实上游全协议自动提取与转换工作流")
+    print("🚀 开始运行 GitHub 真实上游 Xray (VLESS Reality) 提取与转换工作流")
     print("=" * 65)
 
-    input_files = [URLS_FILE, URLS_HY2_FILE]
-    urls = extract_all_urls(input_files)
-    print(f"[*] 从 txt 文档成功提取到 {len(urls)} 个 URL 链接")
+    urls = extract_all_urls(URLS_FILE)
+    print(f"[*] 从 urls.txt 成功提取到 {len(urls)} 个 URL 链接")
 
-    all_proxies = []
+    all_clash_proxies = []
     all_uris = []
-    hy2_proxies = []
-    hy2_uris = []
+    all_singbox_nodes = []
+    first_raw_json = None
 
-    # 分组处理节点
-    # 1. 首先处理 clash.meta2 (IPv4 & IPv6 Hysteria 1)
-    # 2. 其次处理 hysteria2 (Hysteria 2)
     seen_endpoints = set()
-    node_idx = 1
 
     for u in urls:
         print(f"[*] 正在处理: {u}")
         content = fetch_upstream_content(u)
-        
-        proxy = None
-        uri = None
+        if not content:
+            continue
 
-        if "clash.meta2" in u or (content and "proxies:" in content):
-            name = f"Hysteria1-IPv4-{node_idx:02d}" if "62.210" in str(content) or "163.172" in str(content) else f"Hysteria1-{node_idx:02d}"
-            proxy, uri = parse_yaml_node(content, name)
-        else:
-            name = f"Hysteria2-{node_idx:02d}"
-            proxy, uri = parse_json_node(content, name)
+        if not first_raw_json:
+            try:
+                first_raw_json = json.loads(content)
+            except Exception:
+                pass
 
-        if proxy:
-            endpoint = f"{proxy['type']}_{proxy['server']}_{proxy['port']}"
+        default_name = f"Xray-VLESS-{len(all_clash_proxies)+1:02d}"
+        clash_p, uri, singbox_n = parse_xray_node(content, default_name)
+
+        if clash_p:
+            endpoint = f"{clash_p['server']}_{clash_p['port']}"
             if endpoint not in seen_endpoints:
                 seen_endpoints.add(endpoint)
-                proxy["name"] = f"{'Hysteria1-IPv4' if proxy['type'] == 'hysteria' and ':' not in proxy['server'] else 'Hysteria2' if proxy['type'] == 'hysteria2' else 'Hysteria1'}-{len(all_proxies)+1:02d}"
-                all_proxies.append(proxy)
+                is_v6 = ":" in clash_p["server"]
+                clash_p["name"] = f"Xray-VLESS-{'IPv6' if is_v6 else 'IPv4'}-{len(all_clash_proxies)+1:02d}"
+                singbox_n["tag"] = clash_p["name"]
+                
+                all_clash_proxies.append(clash_p)
                 all_uris.append(uri)
-                if proxy["type"] == "hysteria2":
-                    hy2_proxies.append(proxy)
-                    hy2_uris.append(uri)
-                print(f"  [√] 成功解析节点: {proxy['name']} ➔ {proxy['server']}:{proxy['port']} (类型: {proxy['type']}, SNI: {proxy['sni']})")
-                node_idx += 1
+                all_singbox_nodes.append(singbox_n)
+                print(f"  [√] 成功解析 Xray 节点: {clash_p['name']} ➔ {clash_p['server']}:{clash_p['port']} (Network: {clash_p.get('network')}, SNI: {clash_p.get('servername')})")
 
-    # 如果抓取节点少于 4 个，补全默认备用节点
-    if not all_proxies:
-        p1 = {
-            "name": "Hysteria1-IPv4-01",
-            "type": "hysteria",
-            "server": "62.210.70.191",
-            "port": 23556,
-            "auth-str": "github.com/Alvin9999-newpac/fanqiang",
-            "sni": "bing.com",
-            "skip-cert-verify": True,
-            "alpn": ["h3"],
-            "protocol": "udp",
-            "up": "11 Mbps",
-            "down": "55 Mbps",
-            "fast-open": True
+    # 兜底默认备用节点 (确保无论网络状况如何均有完整节点)
+    if not all_clash_proxies:
+        print("[!] 上游临时未响应，注入标准稳定 VLESS 节点作为备用...")
+        fallback_v4 = {
+            "name": "Xray-VLESS-IPv4-01",
+            "type": "vless",
+            "server": "62.210.70.194",
+            "port": 37783,
+            "uuid": "a289c660-1b12-432b-a06c-c2ae469272b0",
+            "udp": True,
+            "tls": True,
+            "flow": "",
+            "servername": "www.yahoo.com",
+            "client-fingerprint": "chrome",
+            "network": "xhttp",
+            "reality-opts": {
+                "public-key": "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg",
+                "short-id": "21569dd6"
+            },
+            "xhttp-opts": {
+                "path": "/OCrp5Ajs",
+                "mode": "auto"
+            }
         }
-        p2 = {
-            "name": "Hysteria1-IPv4-02",
-            "type": "hysteria",
-            "server": "163.172.117.163",
-            "port": 36699,
-            "auth-str": "dongtaiwang.com",
-            "sni": "www.bing.com",
-            "skip-cert-verify": True,
-            "alpn": ["h3"],
-            "protocol": "udp",
-            "up": "11 Mbps",
-            "down": "55 Mbps",
-            "fast-open": True
-        }
-        all_proxies.extend([p1, p2])
+        all_clash_proxies.append(fallback_v4)
+        uri_fallback = "vless://a289c660-1b12-432b-a06c-c2ae469272b0@62.210.70.194:37783?type=xhttp&security=reality&pbk=tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg&fp=chrome&sni=www.yahoo.com&sid=21569dd6&path=%2FOCrp5Ajs&mode=auto#Xray-VLESS-IPv4-01"
+        all_uris.append(uri_fallback)
+        all_singbox_nodes.append({
+            "type": "vless",
+            "tag": "Xray-VLESS-IPv4-01",
+            "server": "62.210.70.194",
+            "server_port": 37783,
+            "uuid": "a289c660-1b12-432b-a06c-c2ae469272b0",
+            "tls": {
+                "enabled": True,
+                "server_name": "www.yahoo.com",
+                "utls": {"enabled": True, "fingerprint": "chrome"},
+                "reality": {
+                    "enabled": True,
+                    "public_key": "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg",
+                    "short_id": "21569dd6"
+                }
+            },
+            "transport": {"type": "xhttp", "path": "/OCrp5Ajs", "mode": "auto"}
+        })
 
-    print(f"\n[=] 总计成功生成 {len(all_proxies)} 个真实节点 (包含 IPv4 与 IPv6)")
+    print(f"\n[=] 总计成功生成 {len(all_clash_proxies)} 个真实 Xray VLESS 节点 (包含 IPv4 与 IPv6)")
 
-    # 1. 纯 Hysteria 2 节点清单 (hy2_config.yaml)
-    target_hy2 = hy2_proxies if hy2_proxies else [p for p in all_proxies if p["type"] == "hysteria2"]
-    if not target_hy2:
-        target_hy2 = all_proxies
-    hy2_yaml_content = "proxies:\n" + dump_yaml_proxies(target_hy2)
-    with open(HY2_CONFIG_YAML, "w", encoding="utf-8") as f:
-        f.write(hy2_yaml_content)
-    print(f"[√] 已写入纯 Hysteria 2 节点配置: {HY2_CONFIG_YAML}")
-
-    # 2. 节点链接清单 (hy2_links.txt)
+    # 1. 写入明文链接 (xray_links.txt)
     uris_text = "\n".join(all_uris)
-    with open(HY2_LINKS_TXT, "w", encoding="utf-8") as f:
-        f.write(uris_text)
-    print(f"[√] 已写入 URI 链接清单: {HY2_LINKS_TXT}")
+    with open(XRAY_LINKS_TXT, "w", encoding="utf-8") as f:
+        f.write(uris_text + "\n")
+    print(f"[√] 已写入 Xray URI 链接清单: {XRAY_LINKS_TXT}")
 
-    # 3. Base64 订阅 (sub.txt)
+    # 2. 写入 Base64 通用订阅 (sub.txt & config.b64)
     b64_content = base64.b64encode(uris_text.encode("utf-8")).decode("utf-8") if uris_text else ""
-    with open(HY2_CONFIG_B64, "w", encoding="utf-8") as f:
-        f.write(b64_content)
     with open(SUB_OUTPUT, "w", encoding="utf-8") as f:
-        f.write(b64_content)
+        f.write(b64_content + "\n")
+    with open(CONFIG_B64, "w", encoding="utf-8") as f:
+        f.write(b64_content + "\n")
     print(f"[√] 已写入 Base64 订阅: {SUB_OUTPUT}")
 
-    # 4. 完整 Clash Meta / Karing 配置 (config.yaml & clash.yaml)
+    # 3. 写入完整 Clash Meta / Karing 订阅 (config.yaml & clash.yaml)
     if os.path.exists(TEMPLATE_FILE):
         with open(TEMPLATE_FILE, "r", encoding="utf-8") as f:
             template_content = f.read()
 
-        rendered_yaml = render_template(template_content, all_proxies)
+        rendered_yaml = render_template(template_content, all_clash_proxies)
         with open(CONFIG_YAML, "w", encoding="utf-8") as f:
             f.write(rendered_yaml)
         with open(CLASH_OUTPUT, "w", encoding="utf-8") as f:
             f.write(rendered_yaml)
-        print(f"[√] 已写入完整 Clash / Karing 订阅 (包含 IPv4 与 IPv6): {CONFIG_YAML}")
+        print(f"[√] 已写入完整 Clash Meta / Karing 订阅: {CONFIG_YAML}")
 
-        config_b64 = base64.b64encode(rendered_yaml.encode("utf-8")).decode("utf-8")
-        with open(CONFIG_B64, "w", encoding="utf-8") as f:
-            f.write(config_b64)
-        print(f"[√] 已写入 config.b64")
-
-    # 5. Sing-Box 格式 (singbox.json)
+    # 4. 写入原生 Xray 客户端完整配置 (xray_config.json)
     try:
-        singbox_outbounds = []
-        for p in all_proxies:
-            up_num = int(re.findall(r"\d+", str(p.get("up", "11")))[0]) if re.findall(r"\d+", str(p.get("up", "11"))) else 11
-            down_num = int(re.findall(r"\d+", str(p.get("down", "55")))[0]) if re.findall(r"\d+", str(p.get("down", "55"))) else 55
-            if p["type"] == "hysteria2":
-                singbox_outbounds.append({
-                    "type": "hysteria2",
-                    "tag": p["name"],
-                    "server": p["server"],
-                    "server_port": p["port"],
-                    "password": p.get("password", p.get("auth", "")),
-                    "tls": {
-                        "enabled": True,
-                        "server_name": p.get("sni", p["server"]),
-                        "insecure": True,
-                        "alpn": ["h3"]
+        xray_client_config = first_raw_json if first_raw_json else {
+            "log": {"loglevel": "warning"},
+            "inbounds": [
+                {"tag": "socks", "port": 1080, "listen": "127.0.0.1", "protocol": "socks", "settings": {"auth": "noauth", "udp": True}},
+                {"tag": "http", "port": 1081, "listen": "127.0.0.1", "protocol": "http", "settings": {"auth": "noauth"}}
+            ],
+            "outbounds": [
+                {
+                    "tag": "proxy",
+                    "protocol": "vless",
+                    "settings": {
+                        "vnext": [{
+                            "address": all_clash_proxies[0]["server"],
+                            "port": all_clash_proxies[0]["port"],
+                            "users": [{"id": all_clash_proxies[0]["uuid"]}]
+                        }]
                     },
-                    "up_mbps": up_num,
-                    "down_mbps": down_num
-                })
-            else:
-                singbox_outbounds.append({
-                    "type": "hysteria",
-                    "tag": p["name"],
-                    "server": p["server"],
-                    "server_port": p["port"],
-                    "auth_str": p.get("auth-str", ""),
-                    "tls": {
-                        "enabled": True,
-                        "server_name": p.get("sni", p["server"]),
-                        "insecure": True,
-                        "alpn": ["h3"]
-                    },
-                    "up_mbps": up_num,
-                    "down_mbps": down_num
-                })
+                    "streamSettings": {
+                        "network": all_clash_proxies[0].get("network", "xhttp"),
+                        "security": "reality",
+                        "realitySettings": {
+                            "serverName": all_clash_proxies[0].get("servername", "www.yahoo.com"),
+                            "fingerprint": all_clash_proxies[0].get("client-fingerprint", "chrome"),
+                            "publicKey": all_clash_proxies[0].get("reality-opts", {}).get("public-key", ""),
+                            "shortId": all_clash_proxies[0].get("reality-opts", {}).get("short-id", "")
+                        },
+                        "xhttpSettings": {
+                            "path": all_clash_proxies[0].get("xhttp-opts", {}).get("path", "/OCrp5Ajs"),
+                            "mode": all_clash_proxies[0].get("xhttp-opts", {}).get("mode", "auto")
+                        }
+                    }
+                },
+                {"tag": "direct", "protocol": "freedom"},
+                {"tag": "block", "protocol": "blackhole"}
+            ]
+        }
+        with open(XRAY_CONFIG_JSON, "w", encoding="utf-8") as f:
+            json.dump(xray_client_config, f, ensure_ascii=False, indent=2)
+        print(f"[√] 已写入原生 Xray 客户端配置: {XRAY_CONFIG_JSON}")
+    except Exception as e:
+        print(f"[!] 生成 Xray JSON 失败: {e}")
+
+    # 5. 写入 Sing-Box 格式配置 (singbox.json)
+    try:
         with open(SINGBOX_OUTPUT, "w", encoding="utf-8") as f:
-            json.dump({"outbounds": singbox_outbounds}, f, ensure_ascii=False, indent=2)
+            json.dump({"outbounds": all_singbox_nodes}, f, ensure_ascii=False, indent=2)
         print(f"[√] 已写入 Sing-Box 格式: {SINGBOX_OUTPUT}")
     except Exception as e:
         print(f"[!] 生成 Sing-Box 失败: {e}")
 
     print("=" * 65)
-    print("✨ 所有节点 (含 IPv4 与 IPv6) 提取与生成全部完成！")
+    print("✨ Xray (VLESS Reality) 全套订阅生成完成！")
     print("=" * 65)
 
 if __name__ == "__main__":

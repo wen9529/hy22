@@ -1,72 +1,56 @@
 {
   "outbounds": [
     {
-      "type": "hysteria",
-      "tag": "Hysteria1-IPv4-01",
-      "server": "62.210.70.191",
-      "server_port": 23556,
-      "auth_str": "github.com/Alvin9999-newpac/fanqiang",
+      "type": "vless",
+      "tag": "Xray-VLESS-IPv4-01",
+      "server": "62.210.70.194",
+      "server_port": 37783,
+      "uuid": "a289c660-1b12-432b-a06c-c2ae469272b0",
+      "flow": "",
       "tls": {
         "enabled": true,
-        "server_name": "bing.com",
-        "insecure": true,
-        "alpn": [
-          "h3"
-        ]
+        "server_name": "www.yahoo.com",
+        "utls": {
+          "enabled": true,
+          "fingerprint": "chrome"
+        },
+        "reality": {
+          "enabled": true,
+          "public_key": "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg",
+          "short_id": "21569dd6"
+        }
       },
-      "up_mbps": 11,
-      "down_mbps": 55
+      "transport": {
+        "type": "xhttp",
+        "path": "/OCrp5Ajs",
+        "mode": "auto"
+      }
     },
     {
-      "type": "hysteria",
-      "tag": "Hysteria1-IPv4-02",
-      "server": "163.172.117.163",
-      "server_port": 36699,
-      "auth_str": "dongtaiwang.com",
+      "type": "vless",
+      "tag": "Xray-VLESS-IPv6-02",
+      "server": "2001:bc8:32d7:302::14",
+      "server_port": 37783,
+      "uuid": "a289c660-1b12-432b-a06c-c2ae469272b0",
+      "flow": "",
       "tls": {
         "enabled": true,
-        "server_name": "bing.com",
-        "insecure": true,
-        "alpn": [
-          "h3"
-        ]
+        "server_name": "www.yahoo.com",
+        "utls": {
+          "enabled": true,
+          "fingerprint": "chrome"
+        },
+        "reality": {
+          "enabled": true,
+          "public_key": "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg",
+          "short_id": "21569dd6"
+        }
       },
-      "up_mbps": 11,
-      "down_mbps": 55
-    },
-    {
-      "type": "hysteria",
-      "tag": "Hysteria1-03",
-      "server": "2a14:7584:d097::a",
-      "server_port": 54177,
-      "auth_str": "dongtaiwang.com",
-      "tls": {
-        "enabled": true,
-        "server_name": "apple.com",
-        "insecure": true,
-        "alpn": [
-          "h3"
-        ]
-      },
-      "up_mbps": 11,
-      "down_mbps": 55
-    },
-    {
-      "type": "hysteria2",
-      "tag": "Hysteria2-04",
-      "server": "2001:bc8:32d7:17b::3",
-      "server_port": 22000,
-      "password": "dongtaiwang.com",
-      "tls": {
-        "enabled": true,
-        "server_name": "www.microsoft.com",
-        "insecure": true,
-        "alpn": [
-          "h3"
-        ]
-      },
-      "up_mbps": 11,
-      "down_mbps": 55
+      "transport": {
+        "type": "xhttp",
+        "path": "/OCrp5Ajs",
+        "mode": "auto"
+      }
     }
   ]
 }

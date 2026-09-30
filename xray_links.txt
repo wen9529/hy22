@@ -1,0 +1,2 @@
+vless://a289c660-1b12-432b-a06c-c2ae469272b0@62.210.70.194:37783?type=xhttp&security=reality&pbk=tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg&fp=chrome&sni=www.yahoo.com&sid=21569dd6&path=/OCrp5Ajs&mode=auto#Xray-VLESS-01
+vless://a289c660-1b12-432b-a06c-c2ae469272b0@[2001:bc8:32d7:302::14]:37783?type=xhttp&security=reality&pbk=tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg&fp=chrome&sni=www.yahoo.com&sid=21569dd6&path=/OCrp5Ajs&mode=auto#Xray-VLESS-02

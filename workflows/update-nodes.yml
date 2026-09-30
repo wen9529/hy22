@@ -1,15 +1,12 @@
 name: 自动提取节点并生成全套订阅
 
 on:
-  # 1. 只要项目内有任何文件被修改/更新提交，即自动触发运行
   push:
     branches:
       - main
       - master
-  # 2. 定时计划任务：每 6 小时自动运行并同步上游最新节点
   schedule:
-    - cron: '0 */6 * * *'
-  # 3. 手动触发：支持在 GitHub 仓库 Actions 页面一键点击运行
+    - cron: '0 0 * * 0'
   workflow_dispatch:
     inputs:
       force_update:
@@ -61,16 +58,18 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           
-          # 暂存所有自动生成的订阅与节点文件
-          git add config.yaml config.b64 hy2_config.yaml hy2_config.b64 hy2_links.txt clash.yaml singbox.json sub.txt 2>/dev/null || true
+          # 暂存所有自动生成的 Xray 订阅与节点文件
+          git add config.yaml config.b64 clash.yaml xray_config.json xray_links.txt singbox.json sub.txt 2>/dev/null || true
+          
+          # 删除旧版遗留的 hy2 订阅文件
+          git rm -f hy2_config.yaml hy2_config.b64 hy2_links.txt 2>/dev/null || true
           
           # 获取当前分支名称 (兼容 main 与 master)
           BRANCH_NAME=$(git branch --show-current || echo "main")
           
           if [[ -n $(git status -s) || "${{ github.event.inputs.force_update }}" == "true" ]]; then
             echo "检测到文件变更，正在提交并推送..."
-            # 使用 [skip ci] 确保自动提交不会引起无限循环构建
-            git commit -m "chore(auto): 自动更新全量节点配置 [skip ci]" || echo "无新修改需要提交"
+            git commit -m "chore(auto): 自动更新全量 Xray 节点配置 [skip ci]" || echo "无新修改需要提交"
             git pull --rebase origin ${BRANCH_NAME} || true
             git push origin ${BRANCH_NAME}
             echo "推送至 ${BRANCH_NAME} 分支成功！"
@@ -84,7 +83,7 @@ jobs:
           echo "正在发起全球 jsDelivr 缓存刷新请求..."
           curl -s "https://purge.jsdelivr.net/gh/${{ github.repository }}@main/config.yaml" || true
           curl -s "https://purge.jsdelivr.net/gh/${{ github.repository }}@main/clash.yaml" || true
-          curl -s "https://purge.jsdelivr.net/gh/${{ github.repository }}@main/hy2_config.yaml" || true
-          curl -s "https://purge.jsdelivr.net/gh/${{ github.repository }}@main/hy2_links.txt" || true
+          curl -s "https://purge.jsdelivr.net/gh/${{ github.repository }}@main/xray_config.json" || true
+          curl -s "https://purge.jsdelivr.net/gh/${{ github.repository }}@main/xray_links.txt" || true
           curl -s "https://purge.jsdelivr.net/gh/${{ github.repository }}@main/sub.txt" || true
           echo "jsDelivr 全球 CDN 缓存清理完成，订阅链接已生效！"

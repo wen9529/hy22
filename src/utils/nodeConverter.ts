@@ -1,101 +1,132 @@
 import * as yaml from 'js-yaml';
-import { ClashProxyItem, Hysteria2RawConfig } from '../types';
+import { ClashProxyItem, XrayRawConfig } from '../types';
 
 /**
- * Converts raw Hysteria2 JSON config to Clash Meta (Mihomo) proxy item
+ * Converts raw Xray JSON config to Clash Meta (Mihomo) VLESS proxy item
  */
-export function convertHysteria2ToClashProxy(
-  rawJson: Hysteria2RawConfig,
+export function convertXrayToClashProxy(
+  rawJson: XrayRawConfig | any,
   nodeName: string
 ): ClashProxyItem | null {
   if (!rawJson) return null;
 
-  let host = '';
-  let port = 443;
+  const outbounds = rawJson.outbounds || [];
+  let proxyOb = outbounds.find((ob: any) =>
+    ['vless', 'vmess', 'trojan', 'shadowsocks'].includes(String(ob.protocol || '').toLowerCase())
+  );
 
-  if (rawJson.server) {
-    // Check if server is "domain:port" or "[ipv6]:port"
-    if (rawJson.server.startsWith('[')) {
-      const v6Match = rawJson.server.match(/^\[(.*?)\]:?(\d+)?$/);
-      if (v6Match) {
-        host = v6Match[1];
-        if (v6Match[2]) port = parseInt(v6Match[2], 10);
-      } else {
-        host = rawJson.server;
-      }
-    } else if (rawJson.server.includes(':')) {
-      const parts = rawJson.server.split(':');
-      host = parts[0];
-      port = parseInt(parts[1], 10) || 443;
-    } else {
-      host = rawJson.server;
-      if (rawJson.port) port = parseInt(rawJson.port, 10);
+  if (!proxyOb && outbounds.length > 0) {
+    proxyOb = outbounds[0];
+  }
+
+  if (!proxyOb) return null;
+
+  const proto = String(proxyOb.protocol || 'vless').toLowerCase();
+  const settings = proxyOb.settings || {};
+  const vnext = settings.vnext || [];
+
+  let server = '62.210.70.194';
+  let port = 37783;
+  let uuid = 'a289c660-1b12-432b-a06c-c2ae469272b0';
+  let flow = '';
+
+  if (vnext.length > 0) {
+    const vn0 = vnext[0];
+    server = String(vn0.address || server).replace(/[\[\]]/g, '');
+    port = parseInt(String(vn0.port || port), 10);
+    const users = vn0.users || [];
+    if (users.length > 0) {
+      uuid = String(users[0].id || uuid);
+      flow = String(users[0].flow || '');
     }
   }
 
-  if (!host) {
-    return null;
-  }
+  const stream = proxyOb.streamSettings || {};
+  const network = String(stream.network || 'xhttp').toLowerCase();
+  const security = String(stream.security || 'reality').toLowerCase();
 
-  // IPv6 to IPv4 automatic mapping
-  if (host.includes(':') || host.startsWith('2001:')) {
-    if (nodeName.includes('02') || nodeName.includes('04') || nodeName.includes('06') || nodeName.includes('08')) {
-      host = 'www.838491.xyz';
-      port = 13377;
-    } else {
-      host = '62.210.70.191';
-      port = 22000;
-    }
-  }
+  const reality = stream.realitySettings || {};
+  const tls = stream.tlsSettings || {};
 
-  const password = rawJson.auth || 'dongtaiwang.com';
-  const sni = rawJson.tls?.sni || (host === 'www.838491.xyz' ? 'www.838491.xyz' : 'www.microsoft.com');
-  const insecure = true; // Always skip cert verify for maximum client compatibility
-  const up = rawJson.bandwidth?.up || '15 mbps';
-  const down = rawJson.bandwidth?.down || '60 mbps';
+  const sni = reality.serverName || tls.serverName || 'www.yahoo.com';
+  const publicKey = reality.publicKey || 'tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg';
+  const shortId = reality.shortId || '21569dd6';
+  const fingerprint = reality.fingerprint || 'chrome';
+
+  const xhttp = stream.xhttpSettings || {};
+  const path = xhttp.path || '/OCrp5Ajs';
+  const mode = xhttp.mode || 'auto';
 
   const proxy: ClashProxyItem = {
     name: nodeName,
-    type: 'hysteria2',
-    server: host,
+    type: 'vless',
+    server: server,
     port: port,
-    password: password,
-    sni: sni,
-    'skip-cert-verify': insecure,
-    alpn: rawJson.tls?.alpn || ['h3'],
-    up: up,
-    down: down,
+    uuid: uuid,
+    udp: true,
+    tls: true,
+    flow: flow || undefined,
+    servername: sni,
+    'client-fingerprint': fingerprint,
+    network: network,
+    'reality-opts': {
+      'public-key': publicKey,
+      'short-id': shortId,
+    },
   };
 
-  if (rawJson.transport?.udp?.hopInterval) {
-    const hop = parseInt(rawJson.transport.udp.hopInterval, 10);
-    if (!isNaN(hop) && hop > 0) {
-      proxy['hop-interval'] = hop;
-    }
-  }
-
-  if (rawJson.obfs?.type) {
-    proxy.obfs = rawJson.obfs.type;
-    if (rawJson.obfs.password) {
-      proxy['obfs-password'] = rawJson.obfs.password;
-    }
+  if (network === 'xhttp') {
+    proxy['xhttp-opts'] = {
+      path: path,
+      mode: mode,
+    };
+  } else if (network === 'ws') {
+    proxy['ws-opts'] = {
+      path: path,
+      headers: { Host: sni },
+    };
+  } else if (network === 'grpc') {
+    proxy['grpc-opts'] = {
+      'grpc-service-name': stream.grpcSettings?.serviceName || '',
+    };
   }
 
   return proxy;
 }
 
 /**
- * Generate hy2:// link
+ * Generate vless:// standard URI link
  */
-export function generateHy2Uri(proxy: ClashProxyItem): string {
-  const pwd = encodeURIComponent(proxy.password || '');
-  const sni = encodeURIComponent(proxy.sni || proxy.server);
-  const tag = encodeURIComponent(proxy.name);
-  const insecure = proxy['skip-cert-verify'] ? '1' : '0';
+export function generateVlessUri(proxy: ClashProxyItem): string {
+  const uuid = proxy.uuid || 'a289c660-1b12-432b-a06c-c2ae469272b0';
   const hostStr = proxy.server.includes(':') && !proxy.server.startsWith('[')
     ? `[${proxy.server}]`
     : proxy.server;
-  return `hy2://${pwd}@${hostStr}:${proxy.port}/?sni=${sni}&insecure=${insecure}#${tag}`;
+  const tag = encodeURIComponent(proxy.name);
+  const net = encodeURIComponent(proxy.network || 'xhttp');
+  const sni = encodeURIComponent(proxy.servername || 'www.yahoo.com');
+  const pbk = encodeURIComponent(proxy['reality-opts']?.['public-key'] || '');
+  const sid = encodeURIComponent(proxy['reality-opts']?.['short-id'] || '');
+  const fp = encodeURIComponent(proxy['client-fingerprint'] || 'chrome');
+
+  const queryParts = [
+    `type=${net}`,
+    `security=reality`,
+    `pbk=${pbk}`,
+    `fp=${fp}`,
+    `sni=${sni}`,
+    `sid=${sid}`,
+  ];
+
+  if (proxy.flow) {
+    queryParts.push(`flow=${encodeURIComponent(proxy.flow)}`);
+  }
+  if (proxy['xhttp-opts']?.path) {
+    queryParts.push(`path=${encodeURIComponent(proxy['xhttp-opts'].path)}`);
+    queryParts.push(`mode=${encodeURIComponent(proxy['xhttp-opts'].mode || 'auto')}`);
+  }
+
+  return `vless://${uuid}@${hostStr}:${proxy.port}?${queryParts.join('&')}#${tag}`;
 }
 
 /**
@@ -103,25 +134,35 @@ export function generateHy2Uri(proxy: ClashProxyItem): string {
  */
 export function convertToSingboxOutbounds(proxies: ClashProxyItem[]) {
   return proxies.map((p) => {
-    // Parse Mbps numbers
-    const upNum = parseInt(String(p.up || '20'), 10) || 20;
-    const downNum = parseInt(String(p.down || '60'), 10) || 60;
-
-    return {
-      type: 'hysteria2',
+    const node: any = {
+      type: 'vless',
       tag: p.name,
       server: p.server,
       server_port: p.port,
-      password: p.password || '',
+      uuid: p.uuid,
       tls: {
         enabled: true,
-        server_name: p.sni || p.server,
-        insecure: Boolean(p['skip-cert-verify']),
-        alpn: p.alpn || ['h3'],
+        server_name: p.servername || 'www.yahoo.com',
+        utls: {
+          enabled: true,
+          fingerprint: p['client-fingerprint'] || 'chrome',
+        },
+        reality: {
+          enabled: true,
+          public_key: p['reality-opts']?.['public-key'] || '',
+          short_id: p['reality-opts']?.['short-id'] || '',
+        },
       },
-      up_mbps: upNum,
-      down_mbps: downNum,
     };
+
+    if (p.network === 'xhttp') {
+      node.transport = {
+        type: 'xhttp',
+        path: p['xhttp-opts']?.path || '/OCrp5Ajs',
+        mode: p['xhttp-opts']?.mode || 'auto',
+      };
+    }
+    return node;
   });
 }
 
@@ -129,12 +170,10 @@ export function convertToSingboxOutbounds(proxies: ClashProxyItem[]) {
  * Default Mihomo / Clash Meta YAML Template
  */
 export const DEFAULT_YAML_TEMPLATE = `# -------------------------------------------------------------
-# Clash Meta (Mihomo) 自动订阅配置 (双栈 IPv4 / IPv6 全面优化版)
+# Clash Meta (Mihomo) & Karing 自动订阅配置 (全端高兼容完美版)
 # 自动生成时间: {{generated_time}}
 # 节点数量: {{node_count}}
 # -------------------------------------------------------------
-port: 7890
-socks-port: 7891
 mixed-port: 7890
 allow-lan: false
 mode: rule
@@ -147,18 +186,14 @@ external-controller: 127.0.0.1:9090
 dns:
   enable: true
   ipv6: true
-  listen: 0.0.0.0:1053
-  enhanced-mode: fake-ip
-  fake-ip-range: 198.18.0.1/16
   nameserver:
     - 223.5.5.5
     - 119.29.29.29
     - 1.1.1.1
     - 8.8.8.8
     - 2400:3200::1
-    - 2606:4700:4700::1111
 
-# 节点配置列表 (自动注入)
+# 节点配置列表 (自动注入完整参数)
 proxies:
 {{proxies}}
 
@@ -169,12 +204,12 @@ proxy-groups:
     proxies:
       - ♻️ 自动选择
       - ⚖️ 负载均衡
-{{proxy_names_indented}}
       - DIRECT
+{{proxy_names_indented}}
 
   - name: ♻️ 自动选择
     type: url-test
-    url: https://www.gstatic.com/generate_204
+    url: http://www.gstatic.com/generate_204
     interval: 300
     tolerance: 50
     proxies:
@@ -183,7 +218,7 @@ proxy-groups:
   - name: ⚖️ 负载均衡
     type: load-balance
     strategy: consistent-hashing
-    url: https://www.gstatic.com/generate_204
+    url: http://www.gstatic.com/generate_204
     interval: 300
     proxies:
 {{proxy_names_indented}}
@@ -202,12 +237,9 @@ proxy-groups:
 
 # 分流规则
 rules:
-  - GEOSITE,private,🎯 全球直连
-  - GEOIP,private,🎯 全球直连,no-resolve
-  - GEOSITE,category-games@cn,🎯 全球直连
-  - GEOSITE,cn,🎯 全球直连
-  - GEOIP,CN,🎯 全球直连
-  - MATCH,🐟 漏网之鱼
+  - GEOIP,LAN,DIRECT,no-resolve
+  - GEOIP,CN,DIRECT
+  - MATCH,🚀 节点选择
 `;
 
 /**
@@ -232,19 +264,16 @@ export function renderYamlConfig(
     noRefs: true,
   });
 
-  // Indent each proxy line by 2 spaces to align under "proxies:"
   const indentedProxies = proxiesYaml
     .split('\n')
     .filter((line) => line.trim().length > 0)
     .map((line) => `  ${line}`)
     .join('\n');
 
-  // Format proxy names indented (6 spaces) for proxy-groups
   const proxyNamesIndented = proxies
     .map((p) => `      - "${p.name}"`)
     .join('\n');
 
-  // Plain names list
   const proxyNamesList = proxies
     .map((p) => `  - "${p.name}"`)
     .join('\n');
