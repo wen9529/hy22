@@ -1,105 +1,105 @@
 proxies:
-- name: Hysteria2-01
-  type: hysteria2
-  server: 2001:bc8:32d7:17b::3
-  port: 22000
-  password: dongtaiwang.com
-  auth: dongtaiwang.com
-  sni: www.microsoft.com
-  skip-cert-verify: true
-  alpn:
-  - h3
-  up: 11 mbps
-  down: 55 mbps
-  fast-open: true
-- name: Hysteria2-02
-  type: hysteria2
-  server: 2001:bc8:32d7:17b::3
-  port: 22000
-  password: dongtaiwang.com
-  auth: dongtaiwang.com
-  sni: www.microsoft.com
-  skip-cert-verify: true
-  alpn:
-  - h3
-  up: 11 mbps
-  down: 55 mbps
-  fast-open: true
-- name: Hysteria2-03
-  type: hysteria2
-  server: 2001:bc8:32d7:17b::3
-  port: 22000
-  password: dongtaiwang.com
-  auth: dongtaiwang.com
-  sni: www.microsoft.com
-  skip-cert-verify: true
-  alpn:
-  - h3
-  up: 11 mbps
-  down: 55 mbps
-  fast-open: true
-- name: Hysteria2-04
-  type: hysteria2
-  server: 2001:bc8:32d7:17b::3
-  port: 22000
-  password: dongtaiwang.com
-  auth: dongtaiwang.com
-  sni: www.microsoft.com
-  skip-cert-verify: true
-  alpn:
-  - h3
-  up: 11 mbps
-  down: 55 mbps
-  fast-open: true
-- name: Hysteria2-05
-  type: hysteria2
-  server: 2001:bc8:32d7:17b::3
-  port: 22000
-  password: dongtaiwang.com
-  auth: dongtaiwang.com
-  sni: www.microsoft.com
-  skip-cert-verify: true
-  alpn:
-  - h3
-  up: 11 mbps
-  down: 55 mbps
-  fast-open: true
-- name: Hysteria2-06
-  type: hysteria2
-  server: 2001:bc8:32d7:17b::3
-  port: 22000
-  password: dongtaiwang.com
-  auth: dongtaiwang.com
-  sni: www.microsoft.com
-  skip-cert-verify: true
-  alpn:
-  - h3
-  up: 11 mbps
-  down: 55 mbps
-  fast-open: true
-- name: Hysteria2-07
-  type: hysteria2
-  server: 2001:bc8:32d7:17b::3
-  port: 22000
-  password: dongtaiwang.com
-  auth: dongtaiwang.com
-  sni: www.microsoft.com
-  skip-cert-verify: true
-  alpn:
-  - h3
-  up: 11 mbps
-  down: 55 mbps
-  fast-open: true
-- name: Hysteria2-08
-  type: hysteria2
-  server: 2001:bc8:32d7:17b::3
-  port: 22000
-  password: dongtaiwang.com
-  auth: dongtaiwang.com
-  sni: www.microsoft.com
-  skip-cert-verify: true
-  alpn:
-  - h3
-  up: 11 mbps
-  down: 55 mbps
-  fast-open: true
+  - name: "Hysteria2-01"
+    type: hysteria2
+    server: "2001:bc8:32d7:17b::3"
+    port: 22000
+    password: "dongtaiwang.com"
+    auth: "dongtaiwang.com"
+    sni: "www.microsoft.com"
+    skip-cert-verify: true
+    alpn:
+      - h3
+    up: "11 mbps"
+    down: "55 mbps"
+    fast-open: true
+  - name: "Hysteria2-02"
+    type: hysteria2
+    server: "2001:bc8:32d7:17b::3"
+    port: 22000
+    password: "dongtaiwang.com"
+    auth: "dongtaiwang.com"
+    sni: "www.microsoft.com"
+    skip-cert-verify: true
+    alpn:
+      - h3
+    up: "11 mbps"
+    down: "55 mbps"
+    fast-open: true
+  - name: "Hysteria2-03"
+    type: hysteria2
+    server: "2001:bc8:32d7:17b::3"
+    port: 22000
+    password: "dongtaiwang.com"
+    auth: "dongtaiwang.com"
+    sni: "www.microsoft.com"
+    skip-cert-verify: true
+    alpn:
+      - h3
+    up: "11 mbps"
+    down: "55 mbps"
+    fast-open: true
+  - name: "Hysteria2-04"
+    type: hysteria2
+    server: "2001:bc8:32d7:17b::3"
+    port: 22000
+    password: "dongtaiwang.com"
+    auth: "dongtaiwang.com"
+    sni: "www.microsoft.com"
+    skip-cert-verify: true
+    alpn:
+      - h3
+    up: "11 mbps"
+    down: "55 mbps"
+    fast-open: true
+  - name: "Hysteria2-05"
+    type: hysteria2
+    server: "2001:bc8:32d7:17b::3"
+    port: 22000
+    password: "dongtaiwang.com"
+    auth: "dongtaiwang.com"
+    sni: "www.microsoft.com"
+    skip-cert-verify: true
+    alpn:
+      - h3
+    up: "11 mbps"
+    down: "55 mbps"
+    fast-open: true
+  - name: "Hysteria2-06"
+    type: hysteria2
+    server: "2001:bc8:32d7:17b::3"
+    port: 22000
+    password: "dongtaiwang.com"
+    auth: "dongtaiwang.com"
+    sni: "www.microsoft.com"
+    skip-cert-verify: true
+    alpn:
+      - h3
+    up: "11 mbps"
+    down: "55 mbps"
+    fast-open: true
+  - name: "Hysteria2-07"
+    type: hysteria2
+    server: "2001:bc8:32d7:17b::3"
+    port: 22000
+    password: "dongtaiwang.com"
+    auth: "dongtaiwang.com"
+    sni: "www.microsoft.com"
+    skip-cert-verify: true
+    alpn:
+      - h3
+    up: "11 mbps"
+    down: "55 mbps"
+    fast-open: true
+  - name: "Hysteria2-08"
+    type: hysteria2
+    server: "2001:bc8:32d7:17b::3"
+    port: 22000
+    password: "dongtaiwang.com"
+    auth: "dongtaiwang.com"
+    sni: "www.microsoft.com"
+    skip-cert-verify: true
+    alpn:
+      - h3
+    up: "11 mbps"
+    down: "55 mbps"
+    fast-open: true
