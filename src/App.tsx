@@ -129,35 +129,47 @@ export default function App() {
   const [templateText, setTemplateText] = useState<string>(DEFAULT_YAML_TEMPLATE);
   const [isTesting, setIsTesting] = useState<boolean>(false);
 
-  // GitHub user repo info from screenshot
-  const githubUser = 'wen9529';
-  const githubRepo = 'hy2';
+  // GitHub user repo info from runner logs
+  const [githubUser, setGithubUser] = useState<string>('wen9529');
+  const [githubRepo, setGithubRepo] = useState<string>('hy22');
   const branch = 'main';
 
   const subLinks = [
     {
-      name: 'jsDelivr 免费高速 CDN (国内免翻墙首选 ⭐)',
-      url: `https://fastly.jsdelivr.net/gh/${githubUser}/${githubRepo}@${branch}/clash.yaml`,
-      desc: '支持国内网络直接更新，免翻墙，速度最快。',
+      name: 'Clash Meta 完整订阅 (config.yaml) - jsDelivr CDN ⭐ 首选',
+      url: `https://fastly.jsdelivr.net/gh/${githubUser}/${githubRepo}@${branch}/config.yaml`,
+      desc: '包含完整分流策略组与规则，国内免翻墙高速拉取。',
+      speed: '极快 (推荐)',
+    },
+    {
+      name: '纯净 Hysteria 2 订阅 (hy2_config.yaml)',
+      url: `https://fastly.jsdelivr.net/gh/${githubUser}/${githubRepo}@${branch}/hy2_config.yaml`,
+      desc: '仅包含 4 个 Hysteria 2 节点列表，适合作为 proxy-provider 外部引用。',
       speed: '极快',
     },
     {
-      name: 'GhProxy 镜像加速订阅',
-      url: `https://ghproxy.net/https://raw.githubusercontent.com/${githubUser}/${githubRepo}/${branch}/clash.yaml`,
-      desc: '专为 GitHub 设计的反代加速源。',
-      speed: '高速',
-    },
-    {
-      name: 'Sing-box 订阅链接 (singbox.json)',
-      url: `https://fastly.jsdelivr.net/gh/${githubUser}/${githubRepo}@${branch}/singbox.json`,
-      desc: '原生 Sing-box outbounds 结构。',
-      speed: '极快',
-    },
-    {
-      name: '通用 Base64 订阅 (小火箭 / v2rayN)',
+      name: '通用 Base64 订阅 (sub.txt / hy2_config.b64)',
       url: `https://fastly.jsdelivr.net/gh/${githubUser}/${githubRepo}@${branch}/sub.txt`,
-      desc: 'Base64 编码的 hy2:// 节点链接。',
+      desc: 'Base64 编码，适合 Shadowrocket (小火箭)、v2rayN 一键导入。',
       speed: '通用',
+    },
+    {
+      name: '原生节点明文清单 (hy2_links.txt)',
+      url: `https://fastly.jsdelivr.net/gh/${githubUser}/${githubRepo}@${branch}/hy2_links.txt`,
+      desc: '每行一个标准 hy2:// 协议链接，方便直接单节点复制。',
+      speed: '明文',
+    },
+    {
+      name: 'Sing-Box 官方格式 (singbox.json)',
+      url: `https://fastly.jsdelivr.net/gh/${githubUser}/${githubRepo}@${branch}/singbox.json`,
+      desc: '原生 Sing-Box outbounds 结构。',
+      speed: '极快',
+    },
+    {
+      name: 'GhProxy 镜像加速 (备用通道)',
+      url: `https://ghproxy.net/https://raw.githubusercontent.com/${githubUser}/${githubRepo}/${branch}/config.yaml`,
+      desc: 'GitHub 反代线路，国内备用拉取通道。',
+      speed: '高速',
     },
   ];
 
