@@ -55,12 +55,27 @@ if exist config.json goto startcopy
 
 export const SAMPLE_XRAY_JSON = `{
   "log": { "loglevel": "warning" },
+  "dns": {
+    "hosts": {
+      "dns.google": ["8.8.8.8","8.8.4.4","2001:4860:4860::8888","2001:4860:4860::8844"],
+      "dns.alidns.com": ["223.5.5.5","223.6.6.6","2400:3200::1","2400:3200:baba::1"],
+      "one.one.one.one": ["1.1.1.1","1.0.0.1","2606:4700:4700::1111","2606:4700:4700::1001"],
+      "cloudflare-dns.com": ["104.16.249.249","104.16.248.249","2606:4700::6810:f8f9","2606:4700::6810:f9f9"],
+      "dot.pub": ["1.12.12.12","120.53.53.53"]
+    },
+    "servers": [
+      { "address": "https://dns.alidns.com/dns-query", "domains": ["geosite:private"], "skipFallback": true },
+      { "address": "223.5.5.5", "domains": ["full:dns.alidns.com","full:cloudflare-dns.com"], "skipFallback": true },
+      "https://cloudflare-dns.com/dns-query"
+    ]
+  },
   "inbounds": [
     {
       "tag": "socks",
       "port": 1080,
       "listen": "127.0.0.1",
       "protocol": "socks",
+      "sniffing": { "enabled": true, "destOverride": ["http","tls"], "routeOnly": false },
       "settings": { "auth": "noauth", "udp": true }
     },
     {
@@ -68,6 +83,7 @@ export const SAMPLE_XRAY_JSON = `{
       "port": 1081,
       "listen": "127.0.0.1",
       "protocol": "http",
+      "sniffing": { "enabled": true, "destOverride": ["http","tls"], "routeOnly": false },
       "settings": { "auth": "noauth" }
     }
   ],
@@ -77,10 +93,11 @@ export const SAMPLE_XRAY_JSON = `{
       "protocol": "vless",
       "settings": {
         "vnext": [{
-          "address": "62.210.70.194",
-          "port": 37783,
+          "address": "62.210.113.151",
+          "port": 45641,
           "users": [{
-            "id": "a289c660-1b12-432b-a06c-c2ae469272b0"
+            "id": "f2d9e117-231c-4946-87d8-2cde2222b85d",
+            "encryption": "mlkem768x25519plus.native.0rtt..."
           }]
         }]
       },
@@ -88,18 +105,26 @@ export const SAMPLE_XRAY_JSON = `{
         "network": "xhttp",
         "security": "reality",
         "realitySettings": {
-          "serverName": "www.yahoo.com",
+          "serverName": "www.lovelive-anime.jp",
           "fingerprint": "chrome",
-          "publicKey": "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg",
-          "shortId": "21569dd6"
+          "publicKey": "Nw-FuuCWzFZvQtQbJjDCYJpCKyO8cuvibbTGBeoZRyo",
+          "shortId": "1ea5bfb5"
         },
         "xhttpSettings": {
-          "path": "/OCrp5Ajs",
+          "path": "/SSSuqkzN",
           "mode": "auto"
         }
       }
     },
     { "tag": "direct", "protocol": "freedom" },
     { "tag": "block", "protocol": "blackhole" }
-  ]
+  ],
+  "routing": {
+    "domainStrategy": "AsIs",
+    "rules": [
+      { "type": "field", "outboundTag": "block", "ip": ["geoip:private"] },
+      { "type": "field", "outboundTag": "direct", "domain": ["geosite:private"] },
+      { "type": "field", "outboundTag": "proxy", "port": "0-65535" }
+    ]
+  }
 }`;

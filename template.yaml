@@ -13,11 +13,31 @@ external-controller: 127.0.0.1:9090
 dns:
   enable: true
   ipv6: false
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  hosts:
+    'dns.google':
+      - 8.8.8.8
+      - 8.8.4.4
+    'dns.alidns.com':
+      - 223.5.5.5
+      - 223.6.6.6
+    'one.one.one.one':
+      - 1.1.1.1
+      - 1.0.0.1
+    'cloudflare-dns.com':
+      - 104.16.249.249
+      - 104.16.248.249
+    'dot.pub':
+      - 1.12.12.12
+      - 120.53.53.53
   nameserver:
     - 223.5.5.5
     - 119.29.29.29
     - 1.1.1.1
     - 8.8.8.8
+    - https://dns.alidns.com/dns-query
+    - https://cloudflare-dns.com/dns-query
 
 # 节点配置列表
 proxies:
@@ -61,7 +81,7 @@ proxy-groups:
       - 🚀 节点选择
       - 🎯 全球直连
 
-# 分流规则 (纯标准规则，免 GeoIP 依赖，杜绝任何客户端报错)
+# 分流规则
 rules:
   - IP-CIDR,127.0.0.0/8,DIRECT,no-resolve
   - IP-CIDR,192.168.0.0/16,DIRECT,no-resolve
