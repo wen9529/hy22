@@ -1,8 +1,4 @@
-hy2://dongtaiwang.com@[2001:bc8:32d7:17b::3]:22000/?sni=www.microsoft.com&insecure=1#Hysteria2-01
-hy2://dongtaiwang.com@[2001:bc8:32d7:17b::3]:22000/?sni=www.microsoft.com&insecure=1#Hysteria2-02
-hy2://dongtaiwang.com@[2001:bc8:32d7:17b::3]:22000/?sni=www.microsoft.com&insecure=1#Hysteria2-03
+hysteria://62.210.70.191:23556?auth=github.com/Alvin9999-newpac/fanqiang&sni=bing.com&insecure=1&protocol=udp#Hysteria1-IPv4-01
+hysteria://163.172.117.163:36699?auth=dongtaiwang.com&sni=bing.com&insecure=1&protocol=udp#Hysteria1-IPv4-02
+hysteria://[2a14:7584:d097::a]:54177?auth=dongtaiwang.com&sni=apple.com&insecure=1&protocol=udp#Hysteria1-03
 hy2://dongtaiwang.com@[2001:bc8:32d7:17b::3]:22000/?sni=www.microsoft.com&insecure=1#Hysteria2-04
-hy2://dongtaiwang.com@[2001:bc8:32d7:17b::3]:22000/?sni=www.microsoft.com&insecure=1#Hysteria2-05
-hy2://dongtaiwang.com@[2001:bc8:32d7:17b::3]:22000/?sni=www.microsoft.com&insecure=1#Hysteria2-06
-hy2://dongtaiwang.com@[2001:bc8:32d7:17b::3]:22000/?sni=www.microsoft.com&insecure=1#Hysteria2-07
-hy2://dongtaiwang.com@[2001:bc8:32d7:17b::3]:22000/?sni=www.microsoft.com&insecure=1#Hysteria2-08

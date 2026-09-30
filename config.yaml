@@ -22,109 +22,57 @@ dns:
 
 # 节点配置列表 (自动注入完整参数)
 proxies:
-  - name: Hysteria2-01
-    type: hysteria2
-    server: 2001:bc8:32d7:17b::3
-    port: 22000
-    password: dongtaiwang.com
-    auth: dongtaiwang.com
-    sni: www.microsoft.com
+  - name: "Hysteria1-IPv4-01"
+    type: hysteria
+    server: "62.210.70.191"
+    port: 23556
+    auth-str: "github.com/Alvin9999-newpac/fanqiang"
+    sni: "bing.com"
     skip-cert-verify: true
     alpn:
-    - h3
-    up: 11 mbps
-    down: 55 mbps
+      - h3
+    protocol: udp
+    up: "11 Mbps"
+    down: "55 Mbps"
     fast-open: true
-  - name: Hysteria2-02
-    type: hysteria2
-    server: 2001:bc8:32d7:17b::3
-    port: 22000
-    password: dongtaiwang.com
-    auth: dongtaiwang.com
-    sni: www.microsoft.com
+  - name: "Hysteria1-IPv4-02"
+    type: hysteria
+    server: "163.172.117.163"
+    port: 36699
+    auth-str: "dongtaiwang.com"
+    sni: "bing.com"
     skip-cert-verify: true
     alpn:
-    - h3
-    up: 11 mbps
-    down: 55 mbps
+      - h3
+    protocol: udp
+    up: "11 Mbps"
+    down: "55 Mbps"
     fast-open: true
-  - name: Hysteria2-03
-    type: hysteria2
-    server: 2001:bc8:32d7:17b::3
-    port: 22000
-    password: dongtaiwang.com
-    auth: dongtaiwang.com
-    sni: www.microsoft.com
+  - name: "Hysteria1-03"
+    type: hysteria
+    server: "2a14:7584:d097::a"
+    port: 54177
+    auth-str: "dongtaiwang.com"
+    sni: "apple.com"
     skip-cert-verify: true
     alpn:
-    - h3
-    up: 11 mbps
-    down: 55 mbps
+      - h3
+    protocol: udp
+    up: "11 Mbps"
+    down: "55 Mbps"
     fast-open: true
-  - name: Hysteria2-04
+  - name: "Hysteria2-04"
     type: hysteria2
-    server: 2001:bc8:32d7:17b::3
+    server: "2001:bc8:32d7:17b::3"
     port: 22000
-    password: dongtaiwang.com
-    auth: dongtaiwang.com
-    sni: www.microsoft.com
+    password: "dongtaiwang.com"
+    auth: "dongtaiwang.com"
+    sni: "www.microsoft.com"
     skip-cert-verify: true
     alpn:
-    - h3
-    up: 11 mbps
-    down: 55 mbps
-    fast-open: true
-  - name: Hysteria2-05
-    type: hysteria2
-    server: 2001:bc8:32d7:17b::3
-    port: 22000
-    password: dongtaiwang.com
-    auth: dongtaiwang.com
-    sni: www.microsoft.com
-    skip-cert-verify: true
-    alpn:
-    - h3
-    up: 11 mbps
-    down: 55 mbps
-    fast-open: true
-  - name: Hysteria2-06
-    type: hysteria2
-    server: 2001:bc8:32d7:17b::3
-    port: 22000
-    password: dongtaiwang.com
-    auth: dongtaiwang.com
-    sni: www.microsoft.com
-    skip-cert-verify: true
-    alpn:
-    - h3
-    up: 11 mbps
-    down: 55 mbps
-    fast-open: true
-  - name: Hysteria2-07
-    type: hysteria2
-    server: 2001:bc8:32d7:17b::3
-    port: 22000
-    password: dongtaiwang.com
-    auth: dongtaiwang.com
-    sni: www.microsoft.com
-    skip-cert-verify: true
-    alpn:
-    - h3
-    up: 11 mbps
-    down: 55 mbps
-    fast-open: true
-  - name: Hysteria2-08
-    type: hysteria2
-    server: 2001:bc8:32d7:17b::3
-    port: 22000
-    password: dongtaiwang.com
-    auth: dongtaiwang.com
-    sni: www.microsoft.com
-    skip-cert-verify: true
-    alpn:
-    - h3
-    up: 11 mbps
-    down: 55 mbps
+      - h3
+    up: "11 mbps"
+    down: "55 mbps"
     fast-open: true
 
 # 策略组配置
@@ -135,14 +83,10 @@ proxy-groups:
       - ♻️ 自动选择
       - ⚖️ 负载均衡
       - DIRECT
-      - "Hysteria2-01"
-      - "Hysteria2-02"
-      - "Hysteria2-03"
+      - "Hysteria1-IPv4-01"
+      - "Hysteria1-IPv4-02"
+      - "Hysteria1-03"
       - "Hysteria2-04"
-      - "Hysteria2-05"
-      - "Hysteria2-06"
-      - "Hysteria2-07"
-      - "Hysteria2-08"
 
   - name: ♻️ 自动选择
     type: url-test
@@ -150,14 +94,10 @@ proxy-groups:
     interval: 300
     tolerance: 50
     proxies:
-      - "Hysteria2-01"
-      - "Hysteria2-02"
-      - "Hysteria2-03"
+      - "Hysteria1-IPv4-01"
+      - "Hysteria1-IPv4-02"
+      - "Hysteria1-03"
       - "Hysteria2-04"
-      - "Hysteria2-05"
-      - "Hysteria2-06"
-      - "Hysteria2-07"
-      - "Hysteria2-08"
 
   - name: ⚖️ 负载均衡
     type: load-balance
@@ -165,14 +105,10 @@ proxy-groups:
     url: http://www.gstatic.com/generate_204
     interval: 300
     proxies:
-      - "Hysteria2-01"
-      - "Hysteria2-02"
-      - "Hysteria2-03"
+      - "Hysteria1-IPv4-01"
+      - "Hysteria1-IPv4-02"
+      - "Hysteria1-03"
       - "Hysteria2-04"
-      - "Hysteria2-05"
-      - "Hysteria2-06"
-      - "Hysteria2-07"
-      - "Hysteria2-08"
 
   - name: 🎯 全球直连
     type: select

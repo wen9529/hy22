@@ -1,18 +1,37 @@
-# Hysteria2 节点链接列表 (支持主备镜像自动容灾)
+# Hysteria & Hysteria2 节点链接列表 (支持主备镜像自动容灾)
 # 格式支持纯 URL 链接，也直接兼容从批处理提取的 wget 脚本
 
-# 节点 1 (主线路 + 备用镜像)
+# IPv4 Hysteria 节点 (来自 clash.meta2)
+# 节点 1 (IPv4: 62.210.70.191:23556)
+https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ip/clash.meta2/1/config.yaml
+https://www.67867867.xyz/Alvin9999/PAC/refs/heads/master/backup/img/1/2/ip/clash.meta2/1/config.yaml
+
+# 节点 2 (IPv4: 163.172.117.163:36699)
+https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ip/clash.meta2/2/config.yaml
+https://www.67867867.xyz/Alvin9999/PAC/refs/heads/master/backup/img/1/2/ip/clash.meta2/2/config.yaml
+
+# 节点 3 (IPv4: 62.210.70.191:23556)
+https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ip/clash.meta2/3/config.yaml
+https://www.67867867.xyz/Alvin9999/PAC/refs/heads/master/backup/img/1/2/ip/clash.meta2/3/config.yaml
+
+# 节点 4 (IPv4: 62.210.70.191:23556)
+https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ip/clash.meta2/4/config.yaml
+https://www.67867867.xyz/Alvin9999/PAC/refs/heads/master/backup/img/1/2/ip/clash.meta2/4/config.yaml
+
+# 节点 5 (IPv6: 2a14:7584:d097::a:54177)
+https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ip/clash.meta2/5/config.yaml
+https://www.67867867.xyz/Alvin9999/PAC/refs/heads/master/backup/img/1/2/ip/clash.meta2/5/config.yaml
+
+# 节点 6 (IPv6: 2a14:7584:d097::a:54177)
+https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ip/clash.meta2/6/config.yaml
+https://www.67867867.xyz/Alvin9999/PAC/refs/heads/master/backup/img/1/2/ip/clash.meta2/6/config.yaml
+
+# Hysteria2 节点 (来自 hysteria2/1..4)
 https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ip/hysteria2/1/config.json
 https://www.67867867.xyz/Alvin9999/PAC/refs/heads/master/backup/img/1/2/ip/hysteria2/1/config.json
-
-# 节点 2 (主线路 + 备用镜像)
 https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ip/hysteria2/2/config.json
 https://www.67867867.xyz/Alvin9999/PAC/refs/heads/master/backup/img/1/2/ip/hysteria2/2/config.json
-
-# 节点 3 (主线路 + 备用镜像)
 https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ip/hysteria2/3/config.json
 https://www.67867867.xyz/Alvin9999/PAC/refs/heads/master/backup/img/1/2/ip/hysteria2/3/config.json
-
-# 节点 4 (主线路 + 备用镜像)
 https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ip/hysteria2/4/config.json
 https://www.67867867.xyz/Alvin9999/PAC/refs/heads/master/backup/img/1/2/ip/hysteria2/4/config.json
