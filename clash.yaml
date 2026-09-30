@@ -1,318 +1,106 @@
-# -------------------------------------------------------------
-# Clash Meta (Mihomo) & Karing 自动订阅配置 (全端高兼容完美版)
-# -------------------------------------------------------------
 mixed-port: 7890
 allow-lan: false
 mode: rule
 log-level: info
 ipv6: false
-unified-delay: true
-tcp-concurrent: true
-external-controller: 127.0.0.1:9090
 
 dns:
   enable: true
   ipv6: false
   enhanced-mode: fake-ip
   fake-ip-range: 198.18.0.1/16
-  hosts:
-    'dns.google':
-      - 8.8.8.8
-      - 8.8.4.4
-    'dns.alidns.com':
-      - 223.5.5.5
-      - 223.6.6.6
-    'one.one.one.one':
-      - 1.1.1.1
-      - 1.0.0.1
-    'cloudflare-dns.com':
-      - 104.16.249.249
-      - 104.16.248.249
-    'dot.pub':
-      - 1.12.12.12
-      - 120.53.53.53
-  nameserver:
+  fake-ip-filter:
+    - "*.lan"
+    - "+.local"
+    - "+.msftconnecttest.com"
+    - "+.msftncsi.com"
+    - "geosite:cn"
+  default-nameserver:
     - 223.5.5.5
     - 119.29.29.29
-    - 1.1.1.1
-    - 8.8.8.8
+  nameserver:
+    - https://doh.pub/dns-query
     - https://dns.alidns.com/dns-query
-    - https://cloudflare-dns.com/dns-query
+  fallback:
+    - https://dns.google/dns-query
+    - https://1.1.1.1/dns-query
+  fallback-filter:
+    geoip: true
+    geoip-code: CN
 
-# 节点配置列表
 proxies:
-  - name: "Xray-VLESS-01"
+  - name: "美国1-Reality-Vision"
     type: vless
-    server: "62.210.70.194"
-    port: 37783
-    uuid: "a289c660-1b12-432b-a06c-c2ae469272b0"
-    udp: true
+    server: 137.175.82.41
+    port: 30556
+    uuid: 949d278e-6d98-4014-84e9-59f1c6c93e0e
+    network: tcp
     tls: true
-    skip-cert-verify: true
-    servername: "www.yahoo.com"
-    client-fingerprint: "chrome"
-    alpn:
-      - h2
-    network: xhttp
-    reality-opts:
-      public-key: "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg"
-      short-id: "21569dd6"
-    xhttp-opts:
-      path: "/OCrp5Ajs"
-      mode: "auto"
-      headers:
-        Host: "www.yahoo.com"
-    splithttp-opts:
-      path: "/OCrp5Ajs"
-      mode: "auto"
-      headers:
-        Host: "www.yahoo.com"
-  - name: "Xray-VLESS-02"
-    type: vless
-    server: "62.210.70.194"
-    port: 37783
-    uuid: "a289c660-1b12-432b-a06c-c2ae469272b0"
     udp: true
-    tls: true
-    skip-cert-verify: true
-    servername: "www.yahoo.com"
-    client-fingerprint: "chrome"
-    alpn:
-      - h2
-    network: xhttp
+    flow: xtls-rprx-vision
+    servername: www.lovelive-anime.jp
+    client-fingerprint: chrome
     reality-opts:
-      public-key: "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg"
-      short-id: "21569dd6"
-    xhttp-opts:
-      path: "/OCrp5Ajs"
-      mode: "auto"
-      headers:
-        Host: "www.yahoo.com"
-    splithttp-opts:
-      path: "/OCrp5Ajs"
-      mode: "auto"
-      headers:
-        Host: "www.yahoo.com"
-  - name: "Xray-VLESS-03"
-    type: vless
-    server: "62.210.70.194"
-    port: 37783
-    uuid: "a289c660-1b12-432b-a06c-c2ae469272b0"
-    udp: true
-    tls: true
-    skip-cert-verify: true
-    servername: "www.yahoo.com"
-    client-fingerprint: "chrome"
-    alpn:
-      - h2
-    network: xhttp
-    reality-opts:
-      public-key: "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg"
-      short-id: "21569dd6"
-    xhttp-opts:
-      path: "/OCrp5Ajs"
-      mode: "auto"
-      headers:
-        Host: "www.yahoo.com"
-    splithttp-opts:
-      path: "/OCrp5Ajs"
-      mode: "auto"
-      headers:
-        Host: "www.yahoo.com"
-  - name: "Xray-VLESS-04"
-    type: vless
-    server: "62.210.70.194"
-    port: 37783
-    uuid: "a289c660-1b12-432b-a06c-c2ae469272b0"
-    udp: true
-    tls: true
-    skip-cert-verify: true
-    servername: "www.yahoo.com"
-    client-fingerprint: "chrome"
-    alpn:
-      - h2
-    network: xhttp
-    reality-opts:
-      public-key: "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg"
-      short-id: "21569dd6"
-    xhttp-opts:
-      path: "/OCrp5Ajs"
-      mode: "auto"
-      headers:
-        Host: "www.yahoo.com"
-    splithttp-opts:
-      path: "/OCrp5Ajs"
-      mode: "auto"
-      headers:
-        Host: "www.yahoo.com"
-  - name: "Xray-VLESS-05"
-    type: vless
-    server: "2001:bc8:32d7:302::14"
-    port: 37783
-    uuid: "a289c660-1b12-432b-a06c-c2ae469272b0"
-    udp: true
-    tls: true
-    skip-cert-verify: true
-    servername: "www.yahoo.com"
-    client-fingerprint: "chrome"
-    alpn:
-      - h2
-    network: xhttp
-    reality-opts:
-      public-key: "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg"
-      short-id: "21569dd6"
-    xhttp-opts:
-      path: "/OCrp5Ajs"
-      mode: "auto"
-      headers:
-        Host: "www.yahoo.com"
-    splithttp-opts:
-      path: "/OCrp5Ajs"
-      mode: "auto"
-      headers:
-        Host: "www.yahoo.com"
-  - name: "Xray-VLESS-06"
-    type: vless
-    server: "2001:bc8:32d7:302::14"
-    port: 37783
-    uuid: "a289c660-1b12-432b-a06c-c2ae469272b0"
-    udp: true
-    tls: true
-    skip-cert-verify: true
-    servername: "www.yahoo.com"
-    client-fingerprint: "chrome"
-    alpn:
-      - h2
-    network: xhttp
-    reality-opts:
-      public-key: "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg"
-      short-id: "21569dd6"
-    xhttp-opts:
-      path: "/OCrp5Ajs"
-      mode: "auto"
-      headers:
-        Host: "www.yahoo.com"
-    splithttp-opts:
-      path: "/OCrp5Ajs"
-      mode: "auto"
-      headers:
-        Host: "www.yahoo.com"
-  - name: "Xray-VLESS-07"
-    type: vless
-    server: "2001:bc8:32d7:302::14"
-    port: 37783
-    uuid: "a289c660-1b12-432b-a06c-c2ae469272b0"
-    udp: true
-    tls: true
-    skip-cert-verify: true
-    servername: "www.yahoo.com"
-    client-fingerprint: "chrome"
-    alpn:
-      - h2
-    network: xhttp
-    reality-opts:
-      public-key: "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg"
-      short-id: "21569dd6"
-    xhttp-opts:
-      path: "/OCrp5Ajs"
-      mode: "auto"
-      headers:
-        Host: "www.yahoo.com"
-    splithttp-opts:
-      path: "/OCrp5Ajs"
-      mode: "auto"
-      headers:
-        Host: "www.yahoo.com"
-  - name: "Xray-VLESS-08"
-    type: vless
-    server: "2001:bc8:32d7:302::14"
-    port: 37783
-    uuid: "a289c660-1b12-432b-a06c-c2ae469272b0"
-    udp: true
-    tls: true
-    skip-cert-verify: true
-    servername: "www.yahoo.com"
-    client-fingerprint: "chrome"
-    alpn:
-      - h2
-    network: xhttp
-    reality-opts:
-      public-key: "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg"
-      short-id: "21569dd6"
-    xhttp-opts:
-      path: "/OCrp5Ajs"
-      mode: "auto"
-      headers:
-        Host: "www.yahoo.com"
-    splithttp-opts:
-      path: "/OCrp5Ajs"
-      mode: "auto"
-      headers:
-        Host: "www.yahoo.com"
+      public-key: EcmNQqZxyW4GCEQF-7nH54w3qgBkLzsfqFSgafGjB0E
+      short-id: d082f567
 
-# 策略组配置
+  - name: "美国2-anytls"
+    type: anytls
+    server: anytls.864106.xyz
+    port: 18001
+    password: "fanvpn.net"
+    sni: anytls.864106.xyz
+
+  - name: "美国3-mieru"
+    type: mieru
+    server: 137.175.82.41
+    port: 28899
+    transport: "TCP"
+    username: "fanvpn.net"
+    password: "fanvpn.net"
+    multiplexing: "MULTIPLEXING_LOW"
+
+  - name: "法国-anytls"
+    type: anytls
+    server: 62.210.7.249
+    port: 11780
+    password: "fanvpn.net"
+    udp: true
+    idle-session-check-interval: 30
+    idle-session-timeout: 30
+    min-idle-session: 5
+    sni: bing.com
+    alpn:
+      - h2
+      - http/1.1
+    skip-cert-verify: true
+
 proxy-groups:
-  - name: 🚀 节点选择
+  - name: "PROXY"
     type: select
     proxies:
-      - ♻️ 自动选择
-      - ⚖️ 负载均衡
-      - DIRECT
-      - "Xray-VLESS-01"
-      - "Xray-VLESS-02"
-      - "Xray-VLESS-03"
-      - "Xray-VLESS-04"
-      - "Xray-VLESS-05"
-      - "Xray-VLESS-06"
-      - "Xray-VLESS-07"
-      - "Xray-VLESS-08"
+      - "智能选择"
+      - "美国1-Reality-Vision"
+      - "美国2-anytls"
+      - "美国3-mieru"
+      - "法国-anytls"
 
-  - name: ♻️ 自动选择
+  - name: "智能选择"
     type: url-test
-    url: http://www.gstatic.com/generate_204
+    proxies:
+      - "美国1-Reality-Vision"
+      - "美国2-anytls"
+      - "美国3-mieru"
+      - "法国-anytls"
+    url: "https://cp.cloudflare.com/generate_204"
     interval: 300
     tolerance: 50
-    proxies:
-      - "Xray-VLESS-01"
-      - "Xray-VLESS-02"
-      - "Xray-VLESS-03"
-      - "Xray-VLESS-04"
-      - "Xray-VLESS-05"
-      - "Xray-VLESS-06"
-      - "Xray-VLESS-07"
-      - "Xray-VLESS-08"
 
-  - name: ⚖️ 负载均衡
-    type: load-balance
-    strategy: consistent-hashing
-    url: http://www.gstatic.com/generate_204
-    interval: 300
-    proxies:
-      - "Xray-VLESS-01"
-      - "Xray-VLESS-02"
-      - "Xray-VLESS-03"
-      - "Xray-VLESS-04"
-      - "Xray-VLESS-05"
-      - "Xray-VLESS-06"
-      - "Xray-VLESS-07"
-      - "Xray-VLESS-08"
-
-  - name: 🎯 全球直连
-    type: select
-    proxies:
-      - DIRECT
-      - 🚀 节点选择
-
-  - name: 🐟 漏网之鱼
-    type: select
-    proxies:
-      - 🚀 节点选择
-      - 🎯 全球直连
-
-# 分流规则
 rules:
-  - IP-CIDR,127.0.0.0/8,DIRECT,no-resolve
-  - IP-CIDR,192.168.0.0/16,DIRECT,no-resolve
-  - IP-CIDR,10.0.0.0/8,DIRECT,no-resolve
-  - IP-CIDR,172.16.0.0/12,DIRECT,no-resolve
-  - MATCH,🚀 节点选择
+  - GEOIP,private,DIRECT,no-resolve
+  - GEOSITE,private,DIRECT
+  - GEOSITE,google,PROXY
+  - GEOSITE,cn,DIRECT
+  - GEOSITE,geolocation-!cn,PROXY
+  - GEOIP,CN,DIRECT
+  - MATCH,PROXY

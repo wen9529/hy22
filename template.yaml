@@ -1,90 +1,56 @@
-# -------------------------------------------------------------
-# Clash Meta (Mihomo) & Karing 自动订阅配置 (全端高兼容完美版)
-# -------------------------------------------------------------
 mixed-port: 7890
 allow-lan: false
 mode: rule
 log-level: info
 ipv6: false
-unified-delay: true
-tcp-concurrent: true
-external-controller: 127.0.0.1:9090
 
 dns:
   enable: true
   ipv6: false
   enhanced-mode: fake-ip
   fake-ip-range: 198.18.0.1/16
-  hosts:
-    'dns.google':
-      - 8.8.8.8
-      - 8.8.4.4
-    'dns.alidns.com':
-      - 223.5.5.5
-      - 223.6.6.6
-    'one.one.one.one':
-      - 1.1.1.1
-      - 1.0.0.1
-    'cloudflare-dns.com':
-      - 104.16.249.249
-      - 104.16.248.249
-    'dot.pub':
-      - 1.12.12.12
-      - 120.53.53.53
-  nameserver:
+  fake-ip-filter:
+    - "*.lan"
+    - "+.local"
+    - "+.msftconnecttest.com"
+    - "+.msftncsi.com"
+    - "geosite:cn"
+  default-nameserver:
     - 223.5.5.5
     - 119.29.29.29
-    - 1.1.1.1
-    - 8.8.8.8
+  nameserver:
+    - https://doh.pub/dns-query
     - https://dns.alidns.com/dns-query
-    - https://cloudflare-dns.com/dns-query
+  fallback:
+    - https://dns.google/dns-query
+    - https://1.1.1.1/dns-query
+  fallback-filter:
+    geoip: true
+    geoip-code: CN
 
-# 节点配置列表
 proxies:
 {{proxies}}
 
-# 策略组配置
 proxy-groups:
-  - name: 🚀 节点选择
+  - name: "PROXY"
     type: select
     proxies:
-      - ♻️ 自动选择
-      - ⚖️ 负载均衡
-      - DIRECT
+      - "智能选择"
 {{proxy_names_indented}}
 
-  - name: ♻️ 自动选择
+  - name: "智能选择"
     type: url-test
-    url: http://www.gstatic.com/generate_204
+    proxies:
+{{proxy_names_indented}}
+    url: "https://cp.cloudflare.com/generate_204"
     interval: 300
     tolerance: 50
-    proxies:
-{{proxy_names_indented}}
 
-  - name: ⚖️ 负载均衡
-    type: load-balance
-    strategy: consistent-hashing
-    url: http://www.gstatic.com/generate_204
-    interval: 300
-    proxies:
-{{proxy_names_indented}}
-
-  - name: 🎯 全球直连
-    type: select
-    proxies:
-      - DIRECT
-      - 🚀 节点选择
-
-  - name: 🐟 漏网之鱼
-    type: select
-    proxies:
-      - 🚀 节点选择
-      - 🎯 全球直连
-
-# 分流规则
 rules:
-  - IP-CIDR,127.0.0.0/8,DIRECT,no-resolve
-  - IP-CIDR,192.168.0.0/16,DIRECT,no-resolve
-  - IP-CIDR,10.0.0.0/8,DIRECT,no-resolve
-  - IP-CIDR,172.16.0.0/12,DIRECT,no-resolve
-  - MATCH,🚀 节点选择
+  - GEOIP,private,DIRECT,no-resolve
+  - GEOSITE,private,DIRECT
+  - GEOSITE,google,PROXY
+  - GEOSITE,cn,DIRECT
+  - GEOSITE,geolocation-!cn,PROXY
+  - GEOIP,CN,DIRECT
+  - MATCH,PROXY
