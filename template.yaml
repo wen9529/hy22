@@ -1,5 +1,5 @@
 # -------------------------------------------------------------
-# Clash Meta (Mihomo) & Karing 自动订阅配置 (移动端/桌面端全兼容版)
+# Clash Meta (Mihomo) & Karing 自动订阅配置 (全端高兼容完美版)
 # -------------------------------------------------------------
 mixed-port: 7890
 allow-lan: false
@@ -13,17 +13,14 @@ external-controller: 127.0.0.1:9090
 dns:
   enable: true
   ipv6: true
-  enhanced-mode: fake-ip
-  fake-ip-range: 198.18.0.1/16
   nameserver:
     - 223.5.5.5
     - 119.29.29.29
     - 1.1.1.1
     - 8.8.8.8
     - 2400:3200::1
-    - 2606:4700:4700::1111
 
-# 节点配置列表 (自动注入)
+# 节点配置列表 (自动注入完整参数)
 proxies:
 {{proxies}}
 
@@ -34,12 +31,12 @@ proxy-groups:
     proxies:
       - ♻️ 自动选择
       - ⚖️ 负载均衡
-{{proxy_names_indented}}
       - DIRECT
+{{proxy_names_indented}}
 
   - name: ♻️ 自动选择
     type: url-test
-    url: https://cp.cloudflare.com/generate_204
+    url: http://www.gstatic.com/generate_204
     interval: 300
     tolerance: 50
     proxies:
@@ -48,7 +45,7 @@ proxy-groups:
   - name: ⚖️ 负载均衡
     type: load-balance
     strategy: consistent-hashing
-    url: https://cp.cloudflare.com/generate_204
+    url: http://www.gstatic.com/generate_204
     interval: 300
     proxies:
 {{proxy_names_indented}}
@@ -65,11 +62,8 @@ proxy-groups:
       - 🚀 节点选择
       - 🎯 全球直连
 
-# 分流规则
+# 分流规则 (精简高兼容，避免 Android/Karing 缺少 GeoSite 库报错)
 rules:
-  - GEOSITE,private,🎯 全球直连
-  - GEOIP,private,🎯 全球直连,no-resolve
-  - GEOSITE,category-games@cn,🎯 全球直连
-  - GEOSITE,cn,🎯 全球直连
-  - GEOIP,CN,🎯 全球直连
+  - GEOIP,LAN,DIRECT,no-resolve
+  - GEOIP,CN,DIRECT
   - MATCH,🚀 节点选择

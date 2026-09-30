@@ -1,5 +1,5 @@
 # -------------------------------------------------------------
-# Clash Meta (Mihomo) & Karing 自动订阅配置 (移动端/桌面端全兼容版)
+# Clash Meta (Mihomo) & Karing 自动订阅配置 (全端高兼容完美版)
 # -------------------------------------------------------------
 mixed-port: 7890
 allow-lan: false
@@ -13,113 +13,79 @@ external-controller: 127.0.0.1:9090
 dns:
   enable: true
   ipv6: true
-  enhanced-mode: fake-ip
-  fake-ip-range: 198.18.0.1/16
   nameserver:
     - 223.5.5.5
     - 119.29.29.29
     - 1.1.1.1
     - 8.8.8.8
     - 2400:3200::1
-    - 2606:4700:4700::1111
 
-# 节点配置列表 (自动注入)
+# 节点配置列表 (自动注入完整参数)
 proxies:
-  - name: Hysteria2-01
+  - name: "HY2 节点 01 (IPv4 域名 838491)"
     type: hysteria2
-    server: www.838491.xyz
+    server: "www.838491.xyz"
     port: 13377
-    password: dongtaiwang.com
-    sni: www.838491.xyz
+    password: "dongtaiwang.com"
+    auth: "dongtaiwang.com"
+    sni: "www.838491.xyz"
     skip-cert-verify: true
     alpn:
-    - h3
-    up: 11 mbps
-    down: 55 mbps
+      - h3
+    up: "11 mbps"
+    down: "55 mbps"
     fast-open: true
-  - name: Hysteria2-01 [IPv4直连]
+  - name: "HY2 节点 02 (IPv4 直连 62.210.8.122)"
     type: hysteria2
-    server: 62.210.8.122
+    server: "62.210.8.122"
     port: 13377
-    password: dongtaiwang.com
-    sni: www.838491.xyz
+    password: "dongtaiwang.com"
+    auth: "dongtaiwang.com"
+    sni: "www.838491.xyz"
     skip-cert-verify: true
     alpn:
-    - h3
-    up: 11 mbps
-    down: 55 mbps
+      - h3
+    up: "11 mbps"
+    down: "55 mbps"
     fast-open: true
-  - name: Hysteria2-02
+  - name: "HY2 节点 03 (IPv4 直连 62.210.70.191)"
     type: hysteria2
-    server: www.838491.xyz
-    port: 13377
-    password: dongtaiwang.com
-    sni: www.838491.xyz
+    server: "62.210.70.191"
+    port: 22000
+    password: "dongtaiwang.com"
+    auth: "dongtaiwang.com"
+    sni: "www.microsoft.com"
     skip-cert-verify: true
     alpn:
-    - h3
-    up: 11 mbps
-    down: 55 mbps
+      - h3
+    up: "11 mbps"
+    down: "55 mbps"
     fast-open: true
-  - name: Hysteria2-02 [IPv4直连]
+  - name: "HY2 节点 04 (IPv6 2001:bc8:32d7:17b::3)"
     type: hysteria2
-    server: 62.210.8.122
-    port: 13377
-    password: dongtaiwang.com
-    sni: www.838491.xyz
+    server: "2001:bc8:32d7:17b::3"
+    port: 22000
+    password: "dongtaiwang.com"
+    auth: "dongtaiwang.com"
+    sni: "www.microsoft.com"
     skip-cert-verify: true
     alpn:
-    - h3
-    up: 11 mbps
-    down: 55 mbps
+      - h3
+    up: "11 mbps"
+    down: "55 mbps"
     fast-open: true
-  - name: Hysteria2-03
+  - name: "HY2 节点 05 (IPv6 2001:bc8:32d7:17b::8)"
     type: hysteria2
-    server: www.838491.xyz
-    port: 13377
-    password: dongtaiwang.com
-    sni: www.838491.xyz
+    server: "2001:bc8:32d7:17b::8"
+    port: 22000
+    password: "dongtaiwang.com"
+    auth: "dongtaiwang.com"
+    sni: "www.microsoft.com"
     skip-cert-verify: true
     alpn:
-    - h3
-    up: 11 mbps
-    down: 55 mbps
-    fast-open: true
-  - name: Hysteria2-03 [IPv4直连]
-    type: hysteria2
-    server: 62.210.8.122
-    port: 13377
-    password: dongtaiwang.com
-    sni: www.838491.xyz
-    skip-cert-verify: true
-    alpn:
-    - h3
-    up: 11 mbps
-    down: 55 mbps
-    fast-open: true
-  - name: Hysteria2-04
-    type: hysteria2
-    server: www.838491.xyz
-    port: 13377
-    password: dongtaiwang.com
-    sni: www.838491.xyz
-    skip-cert-verify: true
-    alpn:
-    - h3
-    up: 11 mbps
-    down: 55 mbps
-    fast-open: true
-  - name: Hysteria2-04 [IPv4直连]
-    type: hysteria2
-    server: 62.210.8.122
-    port: 13377
-    password: dongtaiwang.com
-    sni: www.838491.xyz
-    skip-cert-verify: true
-    alpn:
-    - h3
-    up: 11 mbps
-    down: 55 mbps
+      - h3
+    up: "11 mbps"
+    down: "55 mbps"
     fast-open: true
 
 # 策略组配置
@@ -129,45 +95,36 @@ proxy-groups:
     proxies:
       - ♻️ 自动选择
       - ⚖️ 负载均衡
-      - "Hysteria2-01"
-      - "Hysteria2-01 [IPv4直连]"
-      - "Hysteria2-02"
-      - "Hysteria2-02 [IPv4直连]"
-      - "Hysteria2-03"
-      - "Hysteria2-03 [IPv4直连]"
-      - "Hysteria2-04"
-      - "Hysteria2-04 [IPv4直连]"
       - DIRECT
+      - "HY2 节点 01 (IPv4 域名 838491)"
+      - "HY2 节点 02 (IPv4 直连 62.210.8.122)"
+      - "HY2 节点 03 (IPv4 直连 62.210.70.191)"
+      - "HY2 节点 04 (IPv6 2001:bc8:32d7:17b::3)"
+      - "HY2 节点 05 (IPv6 2001:bc8:32d7:17b::8)"
 
   - name: ♻️ 自动选择
     type: url-test
-    url: https://cp.cloudflare.com/generate_204
+    url: http://www.gstatic.com/generate_204
     interval: 300
     tolerance: 50
     proxies:
-      - "Hysteria2-01"
-      - "Hysteria2-01 [IPv4直连]"
-      - "Hysteria2-02"
-      - "Hysteria2-02 [IPv4直连]"
-      - "Hysteria2-03"
-      - "Hysteria2-03 [IPv4直连]"
-      - "Hysteria2-04"
-      - "Hysteria2-04 [IPv4直连]"
+      - "HY2 节点 01 (IPv4 域名 838491)"
+      - "HY2 节点 02 (IPv4 直连 62.210.8.122)"
+      - "HY2 节点 03 (IPv4 直连 62.210.70.191)"
+      - "HY2 节点 04 (IPv6 2001:bc8:32d7:17b::3)"
+      - "HY2 节点 05 (IPv6 2001:bc8:32d7:17b::8)"
 
   - name: ⚖️ 负载均衡
     type: load-balance
     strategy: consistent-hashing
-    url: https://cp.cloudflare.com/generate_204
+    url: http://www.gstatic.com/generate_204
     interval: 300
     proxies:
-      - "Hysteria2-01"
-      - "Hysteria2-01 [IPv4直连]"
-      - "Hysteria2-02"
-      - "Hysteria2-02 [IPv4直连]"
-      - "Hysteria2-03"
-      - "Hysteria2-03 [IPv4直连]"
-      - "Hysteria2-04"
-      - "Hysteria2-04 [IPv4直连]"
+      - "HY2 节点 01 (IPv4 域名 838491)"
+      - "HY2 节点 02 (IPv4 直连 62.210.8.122)"
+      - "HY2 节点 03 (IPv4 直连 62.210.70.191)"
+      - "HY2 节点 04 (IPv6 2001:bc8:32d7:17b::3)"
+      - "HY2 节点 05 (IPv6 2001:bc8:32d7:17b::8)"
 
   - name: 🎯 全球直连
     type: select
@@ -181,11 +138,8 @@ proxy-groups:
       - 🚀 节点选择
       - 🎯 全球直连
 
-# 分流规则
+# 分流规则 (精简高兼容，避免 Android/Karing 缺少 GeoSite 库报错)
 rules:
-  - GEOSITE,private,🎯 全球直连
-  - GEOIP,private,🎯 全球直连,no-resolve
-  - GEOSITE,category-games@cn,🎯 全球直连
-  - GEOSITE,cn,🎯 全球直连
-  - GEOIP,CN,🎯 全球直连
+  - GEOIP,LAN,DIRECT,no-resolve
+  - GEOIP,CN,DIRECT
   - MATCH,🚀 节点选择
