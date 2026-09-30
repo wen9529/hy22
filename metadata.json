@@ -1,0 +1,6 @@
+{
+  "name": "GitHub Workflow Node Converter",
+  "description": "从TXT文档提取URL，批量获取Hysteria2/V2Ray等节点配置，并根据YAML模板自动生成Clash/Mihomo订阅的GitHub Actions工作流生成器与在线调试工具。",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,74 @@
+# -------------------------------------------------------------
+# Clash Meta (Mihomo) 自动订阅配置模板
+# 仓库: wen9529/hy2
+# -------------------------------------------------------------
+port: 7890
+socks-port: 7891
+mixed-port: 7890
+allow-lan: false
+mode: rule
+log-level: info
+ipv6: false
+external-controller: 127.0.0.1:9090
+
+dns:
+  enable: true
+  listen: 0.0.0.0:1053
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  nameserver:
+    - 223.5.5.5
+    - 119.29.29.29
+    - 1.1.1.1
+    - 8.8.8.8
+
+# 节点配置列表 (脚本自动从 URL 下载并注入)
+proxies:
+{{proxies}}
+
+# 策略组配置
+proxy-groups:
+  - name: 🚀 节点选择
+    type: select
+    proxies:
+      - ♻️ 自动选择
+      - ⚖️ 负载均衡
+{{proxy_names_indented}}
+      - DIRECT
+
+  - name: ♻️ 自动选择
+    type: url-test
+    url: https://www.gstatic.com/generate_204
+    interval: 300
+    tolerance: 50
+    proxies:
+{{proxy_names_indented}}
+
+  - name: ⚖️ 负载均衡
+    type: load-balance
+    strategy: consistent-hashing
+    url: https://www.gstatic.com/generate_204
+    interval: 300
+    proxies:
+{{proxy_names_indented}}
+
+  - name: 🎯 全球直连
+    type: select
+    proxies:
+      - DIRECT
+      - 🚀 节点选择
+
+  - name: 🐟 漏网之鱼
+    type: select
+    proxies:
+      - 🚀 节点选择
+      - 🎯 全球直连
+
+# 分流规则
+rules:
+  - GEOSITE,private,🎯 全球直连
+  - GEOIP,private,🎯 全球直连,no-resolve
+  - GEOSITE,category-games@cn,🎯 全球直连
+  - GEOSITE,cn,🎯 全球直连
+  - GEOIP,CN,🎯 全球直连
+  - MATCH,🚀 节点选择

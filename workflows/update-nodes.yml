@@ -1,0 +1,89 @@
+# ==============================================================================
+# GitHub Actions 定时更新工作流
+# 注意：在 GitHub 网页上新建文件时，文件路径请填：.github/workflows/update-nodes.yml
+# ==============================================================================
+
+name: 自动提取节点并生成 Clash 订阅
+
+on:
+  schedule:
+    # 按照设定时间定时运行 (每 6 小时自动运行一次)
+    - cron: '0 */6 * * *'
+  workflow_dispatch: # 支持在 GitHub 仓库 Actions 页面手动点击运行
+    inputs:
+      force_update:
+        description: '强制更新并提交 (即使节点无变化)'
+        required: false
+        type: boolean
+        default: false
+  push:
+    paths:
+      - 'urls.txt'
+      - 'template.yaml'
+      - 'scripts/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write # 必须赋予写入权限以提交生成的订阅文件
+
+jobs:
+  update-nodes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: 检出仓库代码 (Checkout Repository)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: 安装 Python 运行环境 (Setup Python)
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: 安装依赖 (Install Dependencies)
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          else
+            pip install requests pyyaml
+          fi
+
+      - name: 执行节点提取与转换 (Extract & Convert Nodes)
+        env:
+          FORCE_UPDATE: ${{ github.event.inputs.force_update || 'false' }}
+        run: |
+          python scripts/convert.py
+
+      - name: 检查并提交生成的文件 (Commit and Push)
+        run: |
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          
+          CHANGED_FILES=""
+          if [[ -n $(git status -s clash.yaml) ]]; then
+            CHANGED_FILES="$CHANGED_FILES clash.yaml"
+          fi
+          if [[ -f singbox.json && -n $(git status -s singbox.json) ]]; then
+            CHANGED_FILES="$CHANGED_FILES singbox.json"
+          fi
+          if [[ -f sub.txt && -n $(git status -s sub.txt) ]]; then
+            CHANGED_FILES="$CHANGED_FILES sub.txt"
+          fi
+          
+          if [[ -n "$CHANGED_FILES" || "${{ github.event.inputs.force_update }}" == "true" ]]; then
+            echo "检测到文件变更: $CHANGED_FILES，正在提交..."
+            git add clash.yaml
+            git add singbox.json sub.txt 2>/dev/null || true
+            git commit -m "chore(cron): 自动更新节点配置 [skip ci]"
+            git pull --rebase origin main || true
+            git push origin main
+            echo "提交成功！"
+          else
+            echo "节点配置与输出文件无变动，跳过提交。"
+          fi
