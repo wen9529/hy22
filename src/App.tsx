@@ -178,10 +178,11 @@ export default function App() {
     setUrlItems(extracted);
 
     // Initial node preview
+    const sampleObj = JSON.parse(SAMPLE_HYSTERIA2_JSON);
     const sampleResults: FetchResult[] = extracted.map((item, idx) => {
       const serverPort = 13370 + (item.nodeIndex || idx + 1);
       const sampleJson = {
-        ...SAMPLE_HYSTERIA2_JSON,
+        ...sampleObj,
         server: `node${idx + 1}.838491.xyz:${serverPort}`,
       };
       const proxy = convertHysteria2ToClashProxy(sampleJson, item.name);
@@ -239,10 +240,11 @@ export default function App() {
       }
     } catch {
       // offline simulation fallback
+      const sampleObj = JSON.parse(SAMPLE_HYSTERIA2_JSON);
       const sampleResults: FetchResult[] = urlItems.map((item, idx) => {
         const serverPort = 13370 + (item.nodeIndex || idx + 1);
         const sampleJson = {
-          ...SAMPLE_HYSTERIA2_JSON,
+          ...sampleObj,
           server: `node${idx + 1}.838491.xyz:${serverPort}`,
         };
         const proxy = convertHysteria2ToClashProxy(sampleJson, item.name);
