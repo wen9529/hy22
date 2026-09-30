@@ -1,11 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-GitHub Actions 自动化脚本：
-1. 从 urls.txt 或批处理文本提取节点 URL (智能识别主用与备用镜像)
-2. 批量请求 URL 下载 Hysteria 2 节点 JSON 配置文件
-3. 按照 template.yaml 模板渲染并生成 Clash Meta (Mihomo) 订阅文件
-4. 同步生成 singbox.json 与 sub.txt (Base64 通用订阅)
+GitHub Actions 自动化转换脚本：
+1. 自动读取 urls.txt 与 urls_hy2.txt 中的节点配置链接
+2. 批量请求 URL 下载 Hysteria 2 节点 JSON 配置文件，支持双镜像自动容灾
+3. 按照 template.yaml 模板渲染并生成：
+   - config.yaml (完整 Clash Meta 订阅)
+   - config.b64 (Base64 订阅)
+   - hy2_config.yaml (纯 Hysteria 2 代理配置)
+   - hy2_config.b64 (纯 Hysteria 2 Base64 订阅)
+   - hy2_links.txt (原生 hy2:// 节点链接清单)
+   - clash.yaml (向后兼容)
+   - singbox.json (Sing-box 格式)
 """
 
 import os
@@ -32,24 +38,35 @@ except ImportError:
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 URLS_FILE = os.path.join(BASE_DIR, "urls.txt")
+URLS_HY2_FILE = os.path.join(BASE_DIR, "urls_hy2.txt")
 TEMPLATE_FILE = os.path.join(BASE_DIR, "template.yaml")
+
+# 输出文件清单 (与标准仓库布局完全一致)
+CONFIG_YAML = os.path.join(BASE_DIR, "config.yaml")
+CONFIG_B64 = os.path.join(BASE_DIR, "config.b64")
+HY2_CONFIG_YAML = os.path.join(BASE_DIR, "hy2_config.yaml")
+HY2_CONFIG_B64 = os.path.join(BASE_DIR, "hy2_config.b64")
+HY2_LINKS_TXT = os.path.join(BASE_DIR, "hy2_links.txt")
 CLASH_OUTPUT = os.path.join(BASE_DIR, "clash.yaml")
 SINGBOX_OUTPUT = os.path.join(BASE_DIR, "singbox.json")
-BASE64_OUTPUT = os.path.join(BASE_DIR, "sub.txt")
+SUB_OUTPUT = os.path.join(BASE_DIR, "sub.txt")
 
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
 TIMEOUT = 12
 
-def extract_node_items_from_file(file_path):
-    """从文本文件中提取 URL 并自动匹配主用与备用镜像"""
-    if not os.path.exists(file_path):
-        print(f"[错误] 未找到节点输入文件: {file_path}")
+def extract_node_items_from_files(file_paths):
+    """从多个文本文件中提取 URL 并自动匹配主用与备用镜像"""
+    all_content = ""
+    for path in file_paths:
+        if os.path.exists(path):
+            with open(path, "r", encoding="utf-8", errors="ignore") as f:
+                all_content += "\n" + f.read()
+
+    if not all_content.strip():
+        print("[错误] 未找到任何有效的 URL 输入文件")
         return []
 
-    with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
-        content = f.read()
-
-    urls = re.findall(r"https?://[^\s\"'<>]+", content)
+    urls = re.findall(r"https?://[^\s\"'<>]+", all_content)
     cleaned_urls = [u.rstrip('",\\').strip() for u in urls if u.strip()]
 
     node_groups = {}
@@ -209,55 +226,15 @@ def render_template(template_str, proxies):
     result = result.replace("{{generated_time}}", now_str)
     return result
 
-def write_step_summary(items_count, success_nodes, fail_nodes):
-    summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
-    if not summary_path:
-        return
-
-    now_str = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
-    lines = [
-        "## 🚀 节点自动化更新报告",
-        f"**执行时间**: `{now_str}`",
-        f"**节点统计**: 总任务 `{items_count}` 个 | 成功 `{len(success_nodes)}` 个 | 失败 `{len(fail_nodes)}` 个",
-        "",
-        "### ✅ 已成功生成的节点列表",
-        "| 节点名称 | 服务器 | 端口 | 协议 | 线路状态 |",
-        "| :--- | :--- | :--- | :--- | :--- |"
-    ]
-    for p in success_nodes:
-        status_tag = "🟡 备用镜像" if p.get("_is_mirror") else "🟢 主线路"
-        lines.append(f"| **{p['name']}** | `{p['server']}` | `{p['port']}` | Hysteria2 | {status_tag} |")
-
-    if fail_nodes:
-        lines.extend([
-            "",
-            "### ❌ 获取失败的节点",
-            "| 节点任务 | 主地址 | 状态 |",
-            "| :--- | :--- | :--- |"
-        ])
-        for f in fail_nodes:
-            lines.append(f"| {f['name']} | `{f['primary']}` | 连接超时或解析失败 |")
-
-    lines.extend([
-        "",
-        "---",
-        "💡 *订阅生成完毕，客户端已可通过 jsDelivr CDN 或 Raw 地址拉取最新配置。*"
-    ])
-
-    try:
-        with open(summary_path, "a", encoding="utf-8") as f:
-            f.write("\n".join(lines) + "\n")
-    except Exception:
-        pass
-
 def main():
     print("=" * 65)
     print("🚀 开始运行 GitHub 节点提取与生成工作流")
     print("=" * 65)
 
-    items = extract_node_items_from_file(URLS_FILE)
+    input_files = [URLS_HY2_FILE, URLS_FILE]
+    items = extract_node_items_from_files(input_files)
     if not items:
-        print("[!] 未在 urls.txt 中找到任何可用 URL，程序退出")
+        print("[!] 未找到任何可用 URL，程序退出")
         sys.exit(0)
 
     clash_proxies = []
@@ -286,26 +263,51 @@ def main():
 
     print(f"\n[=] 总计成功解析 {len(clash_proxies)} / {len(items)} 个可用节点")
 
-    if not os.path.exists(TEMPLATE_FILE):
-        print(f"[错误] 模板文件未找到: {TEMPLATE_FILE}")
-        sys.exit(1)
-
-    with open(TEMPLATE_FILE, "r", encoding="utf-8") as f:
-        template_content = f.read()
-
+    # 1. 纯 Hysteria 2 节点清单 (hy2_config.yaml)
     clean_proxies = []
     for p in clash_proxies:
         p_copy = dict(p)
         p_copy.pop("_is_mirror", None)
         clean_proxies.append(p_copy)
 
-    rendered_yaml = render_template(template_content, clean_proxies)
+    hy2_yaml_content = yaml.dump({"proxies": clean_proxies}, allow_unicode=True, sort_keys=False)
+    with open(HY2_CONFIG_YAML, "w", encoding="utf-8") as f:
+        f.write(hy2_yaml_content)
+    print(f"[√] 已写入纯 Hysteria 2 节点配置: {HY2_CONFIG_YAML}")
 
-    with open(CLASH_OUTPUT, "w", encoding="utf-8") as f:
-        f.write(rendered_yaml)
-    print(f"[√] 已写入 Clash Meta 订阅文件: {CLASH_OUTPUT}")
+    # 2. 原生 hy2:// 节点链接清单 (hy2_links.txt)
+    uris_text = "\n".join(hy2_uris)
+    with open(HY2_LINKS_TXT, "w", encoding="utf-8") as f:
+        f.write(uris_text)
+    print(f"[√] 已写入原生链接清单: {HY2_LINKS_TXT}")
 
-    # 生成 singbox.json
+    # 3. Base64 编码 (hy2_config.b64 & sub.txt)
+    b64_content = base64.b64encode(uris_text.encode("utf-8")).decode("utf-8") if uris_text else ""
+    with open(HY2_CONFIG_B64, "w", encoding="utf-8") as f:
+        f.write(b64_content)
+    with open(SUB_OUTPUT, "w", encoding="utf-8") as f:
+        f.write(b64_content)
+    print(f"[√] 已写入 Base64 订阅: {HY2_CONFIG_B64}")
+
+    # 4. 完整 Clash Meta 配置 (config.yaml & clash.yaml)
+    if os.path.exists(TEMPLATE_FILE):
+        with open(TEMPLATE_FILE, "r", encoding="utf-8") as f:
+            template_content = f.read()
+
+        rendered_yaml = render_template(template_content, clean_proxies)
+        with open(CONFIG_YAML, "w", encoding="utf-8") as f:
+            f.write(rendered_yaml)
+        with open(CLASH_OUTPUT, "w", encoding="utf-8") as f:
+            f.write(rendered_yaml)
+        print(f"[√] 已写入完整 Clash 订阅: {CONFIG_YAML}")
+
+        # 5. config.b64
+        config_b64 = base64.b64encode(rendered_yaml.encode("utf-8")).decode("utf-8")
+        with open(CONFIG_B64, "w", encoding="utf-8") as f:
+            f.write(config_b64)
+        print(f"[√] 已写入 config.b64")
+
+    # 6. Sing-Box 格式 (singbox.json)
     try:
         singbox_outbounds = []
         for p in clean_proxies:
@@ -328,24 +330,12 @@ def main():
             })
         with open(SINGBOX_OUTPUT, "w", encoding="utf-8") as f:
             json.dump({"outbounds": singbox_outbounds}, f, ensure_ascii=False, indent=2)
-        print(f"[√] 已写入 Sing-Box 配置文件: {SINGBOX_OUTPUT}")
+        print(f"[√] 已写入 Sing-Box 格式: {SINGBOX_OUTPUT}")
     except Exception as e:
         print(f"[!] 生成 Sing-Box 失败: {e}")
 
-    # 生成 sub.txt
-    try:
-        if hy2_uris:
-            uris_text = "\n".join(hy2_uris)
-            b64_content = base64.b64encode(uris_text.encode("utf-8")).decode("utf-8")
-            with open(BASE64_OUTPUT, "w", encoding="utf-8") as f:
-                f.write(b64_content)
-            print(f"[√] 已写入通用 Base64 订阅: {BASE64_OUTPUT}")
-    except Exception as e:
-        print(f"[!] 生成 Base64 订阅失败: {e}")
-
-    write_step_summary(len(items), clash_proxies, failed_items)
     print("=" * 65)
-    print("✨ 所有工作流文件处理完成，准备提交！")
+    print("✨ 所有格式转换完成，包含 config.yaml, hy2_config.yaml, hy2_links.txt！")
     print("=" * 65)
 
 if __name__ == "__main__":
