@@ -105,6 +105,108 @@
       }
     },
     {
+      "type": "hysteria",
+      "tag": "Hysteria-IPv4-01",
+      "server": "62.210.70.191",
+      "server_port": 23556,
+      "auth_str": "github.com/Alvin9999-newpac/fanqiang",
+      "tls": {
+        "enabled": true,
+        "server_name": "bing.com",
+        "insecure": true,
+        "alpn": [
+          "h3"
+        ]
+      },
+      "up_mbps": 11,
+      "down_mbps": 55
+    },
+    {
+      "type": "hysteria",
+      "tag": "Hysteria-IPv4-02",
+      "server": "163.172.117.163",
+      "server_port": 36699,
+      "auth_str": "dongtaiwang.com",
+      "tls": {
+        "enabled": true,
+        "server_name": "bing.com",
+        "insecure": true,
+        "alpn": [
+          "h3"
+        ]
+      },
+      "up_mbps": 11,
+      "down_mbps": 55
+    },
+    {
+      "type": "hysteria",
+      "tag": "Hysteria-IPv4-03",
+      "server": "62.210.70.191",
+      "server_port": 23556,
+      "auth_str": "github.com/Alvin9999-newpac/fanqiang",
+      "tls": {
+        "enabled": true,
+        "server_name": "bing.com",
+        "insecure": true,
+        "alpn": [
+          "h3"
+        ]
+      },
+      "up_mbps": 11,
+      "down_mbps": 55
+    },
+    {
+      "type": "hysteria",
+      "tag": "Hysteria-IPv4-04",
+      "server": "62.210.70.191",
+      "server_port": 23556,
+      "auth_str": "github.com/Alvin9999-newpac/fanqiang",
+      "tls": {
+        "enabled": true,
+        "server_name": "bing.com",
+        "insecure": true,
+        "alpn": [
+          "h3"
+        ]
+      },
+      "up_mbps": 11,
+      "down_mbps": 55
+    },
+    {
+      "type": "hysteria",
+      "tag": "Hysteria-IPv6-05",
+      "server": "2a14:7584:d097::a",
+      "server_port": 54177,
+      "auth_str": "dongtaiwang.com",
+      "tls": {
+        "enabled": true,
+        "server_name": "apple.com",
+        "insecure": true,
+        "alpn": [
+          "h3"
+        ]
+      },
+      "up_mbps": 11,
+      "down_mbps": 55
+    },
+    {
+      "type": "hysteria",
+      "tag": "Hysteria-IPv6-06",
+      "server": "2a14:7584:d097::a",
+      "server_port": 54177,
+      "auth_str": "dongtaiwang.com",
+      "tls": {
+        "enabled": true,
+        "server_name": "apple.com",
+        "insecure": true,
+        "alpn": [
+          "h3"
+        ]
+      },
+      "up_mbps": 11,
+      "down_mbps": 55
+    },
+    {
       "type": "vless",
       "tag": "Xray-VLESS-Backup-05",
       "server": "62.210.113.151",

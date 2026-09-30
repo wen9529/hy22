@@ -86,6 +86,84 @@ proxies:
     xhttp-opts:
       path: "/OCrp5Ajs"
       mode: "auto"
+  - name: "Hysteria-IPv4-01"
+    type: hysteria
+    server: "62.210.70.191"
+    port: 23556
+    auth-str: "github.com/Alvin9999-newpac/fanqiang"
+    sni: "bing.com"
+    skip-cert-verify: true
+    alpn:
+      - h3
+    protocol: udp
+    up: "11 Mbps"
+    down: "55 Mbps"
+    fast-open: true
+  - name: "Hysteria-IPv4-02"
+    type: hysteria
+    server: "163.172.117.163"
+    port: 36699
+    auth-str: "dongtaiwang.com"
+    sni: "bing.com"
+    skip-cert-verify: true
+    alpn:
+      - h3
+    protocol: udp
+    up: "11 Mbps"
+    down: "55 Mbps"
+    fast-open: true
+  - name: "Hysteria-IPv4-03"
+    type: hysteria
+    server: "62.210.70.191"
+    port: 23556
+    auth-str: "github.com/Alvin9999-newpac/fanqiang"
+    sni: "bing.com"
+    skip-cert-verify: true
+    alpn:
+      - h3
+    protocol: udp
+    up: "11 Mbps"
+    down: "55 Mbps"
+    fast-open: true
+  - name: "Hysteria-IPv4-04"
+    type: hysteria
+    server: "62.210.70.191"
+    port: 23556
+    auth-str: "github.com/Alvin9999-newpac/fanqiang"
+    sni: "bing.com"
+    skip-cert-verify: true
+    alpn:
+      - h3
+    protocol: udp
+    up: "11 Mbps"
+    down: "55 Mbps"
+    fast-open: true
+  - name: "Hysteria-IPv6-05"
+    type: hysteria
+    server: "2a14:7584:d097::a"
+    port: 54177
+    auth-str: "dongtaiwang.com"
+    sni: "apple.com"
+    skip-cert-verify: true
+    alpn:
+      - h3
+    protocol: udp
+    up: "11 Mbps"
+    down: "55 Mbps"
+    fast-open: true
+  - name: "Hysteria-IPv6-06"
+    type: hysteria
+    server: "2a14:7584:d097::a"
+    port: 54177
+    auth-str: "dongtaiwang.com"
+    sni: "apple.com"
+    skip-cert-verify: true
+    alpn:
+      - h3
+    protocol: udp
+    up: "11 Mbps"
+    down: "55 Mbps"
+    fast-open: true
   - name: "Xray-VLESS-Backup-05"
     type: vless
     server: "62.210.113.151"
@@ -115,6 +193,12 @@ proxy-groups:
       - "Xray-VLESS-IPv4-02"
       - "Xray-VLESS-IPv6-03"
       - "Xray-VLESS-IPv6-04"
+      - "Hysteria-IPv4-01"
+      - "Hysteria-IPv4-02"
+      - "Hysteria-IPv4-03"
+      - "Hysteria-IPv4-04"
+      - "Hysteria-IPv6-05"
+      - "Hysteria-IPv6-06"
       - "Xray-VLESS-Backup-05"
 
   - name: ♻️ 自动选择
@@ -127,6 +211,12 @@ proxy-groups:
       - "Xray-VLESS-IPv4-02"
       - "Xray-VLESS-IPv6-03"
       - "Xray-VLESS-IPv6-04"
+      - "Hysteria-IPv4-01"
+      - "Hysteria-IPv4-02"
+      - "Hysteria-IPv4-03"
+      - "Hysteria-IPv4-04"
+      - "Hysteria-IPv6-05"
+      - "Hysteria-IPv6-06"
       - "Xray-VLESS-Backup-05"
 
   - name: ⚖️ 负载均衡
@@ -139,6 +229,12 @@ proxy-groups:
       - "Xray-VLESS-IPv4-02"
       - "Xray-VLESS-IPv6-03"
       - "Xray-VLESS-IPv6-04"
+      - "Hysteria-IPv4-01"
+      - "Hysteria-IPv4-02"
+      - "Hysteria-IPv4-03"
+      - "Hysteria-IPv4-04"
+      - "Hysteria-IPv6-05"
+      - "Hysteria-IPv6-06"
       - "Xray-VLESS-Backup-05"
 
   - name: 🎯 全球直连

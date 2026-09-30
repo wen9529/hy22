@@ -1,22 +1,45 @@
-# Xray (VLESS Reality) 节点配置源列表 (支持主备镜像自动容灾)
-# 格式支持纯 URL 链接，也直接兼容从批处理提取的 wget 脚本
+# -------------------------------------------------------------
+# 节点配置源列表 (Xray VLESS Reality + Hysteria 1 全协议多源容灾)
+# -------------------------------------------------------------
 
-# 节点 1 (IPv4: 62.210.70.194:37783)
+# 1. Xray (VLESS Reality + xhttp) 节点源 (包含 IPv4 与 IPv6)
 https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ip/xray/1/config.json
 https://www.67867867.xyz/Alvin9999/PAC/refs/heads/master/backup/img/1/2/ip/xray/1/config.json
 https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ipp/xray/1/config.json
 
-# 节点 2 (IPv4: 62.210.70.194:37783)
 https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ip/xray/2/config.json
 https://www.67867867.xyz/Alvin9999/PAC/refs/heads/master/backup/img/1/2/ip/xray/2/config.json
 https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ipp/xray/2/config.json
 
-# 节点 3 (IPv6: [2001:bc8:32d7:302::14]:37783)
 https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ip/xray/3/config.json
 https://www.67867867.xyz/Alvin9999/PAC/refs/heads/master/backup/img/1/2/ip/xray/3/config.json
 https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ipp/xray/3/config.json
 
-# 节点 4 (IPv6: [2001:bc8:32d7:302::14]:37783)
 https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ip/xray/4/config.json
 https://www.67867867.xyz/Alvin9999/PAC/refs/heads/master/backup/img/1/2/ip/xray/4/config.json
 https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ipp/xray/4/config.json
+
+# 2. Hysteria 1 / Clash 节点源 (超高速 UDP IPv4: 62.210.70.191、163.172.117.163 与 IPv6)
+https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ip/clash.meta2/1/config.yaml
+https://www.67867867.xyz/Alvin9999/PAC/refs/heads/master/backup/img/1/2/ip/clash.meta2/1/config.yaml
+https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ipp/clash.meta2/1/config.yaml
+
+https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ip/clash.meta2/2/config.yaml
+https://www.67867867.xyz/Alvin9999/PAC/refs/heads/master/backup/img/1/2/ip/clash.meta2/2/config.yaml
+https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ipp/clash.meta2/2/config.yaml
+
+https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ip/clash.meta2/3/config.yaml
+https://www.67867867.xyz/Alvin9999/PAC/refs/heads/master/backup/img/1/2/ip/clash.meta2/3/config.yaml
+https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ipp/clash.meta2/3/config.yaml
+
+https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ip/clash.meta2/4/config.yaml
+https://www.67867867.xyz/Alvin9999/PAC/refs/heads/master/backup/img/1/2/ip/clash.meta2/4/config.yaml
+https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ipp/clash.meta2/4/config.yaml
+
+https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ip/clash.meta2/5/config.yaml
+https://www.67867867.xyz/Alvin9999/PAC/refs/heads/master/backup/img/1/2/ip/clash.meta2/5/config.yaml
+https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ipp/clash.meta2/5/config.yaml
+
+https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ip/clash.meta2/6/config.yaml
+https://www.67867867.xyz/Alvin9999/PAC/refs/heads/master/backup/img/1/2/ip/clash.meta2/6/config.yaml
+https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ipp/clash.meta2/6/config.yaml
