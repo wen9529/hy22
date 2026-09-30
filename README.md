@@ -18,12 +18,17 @@
 https://fastly.jsdelivr.net/gh/wen9529/hy22@main/config.yaml
 ```
 
-### 2. GhProxy 镜像加速链接 (备用)
+### 2. Sing-Box 原生配置链接 (Karing 原生内核直读 🌟)
+```text
+https://fastly.jsdelivr.net/gh/wen9529/hy22@main/singbox.json
+```
+
+### 3. GhProxy 镜像加速链接 (备用)
 ```text
 https://ghproxy.net/https://raw.githubusercontent.com/wen9529/hy22/main/config.yaml
 ```
 
-### 3. GitHub 官方原生 Raw 链接
+### 4. GitHub 官方原生 Raw 链接
 ```text
 https://raw.githubusercontent.com/wen9529/hy22/main/config.yaml
 ```

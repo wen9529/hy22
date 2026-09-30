@@ -1,5 +1,5 @@
 # -------------------------------------------------------------
-# Clash Meta (Mihomo) & Karing 自动订阅配置 (安卓/iOS/电脑全兼容完美版)
+# Clash Meta (Mihomo) & Karing 自动订阅配置 (全端高兼容完美版)
 # -------------------------------------------------------------
 mixed-port: 7890
 allow-lan: false
@@ -13,28 +13,13 @@ external-controller: 127.0.0.1:9090
 dns:
   enable: true
   ipv6: false
-  enhanced-mode: fake-ip
-  fake-ip-range: 198.18.0.1/16
-  default-nameserver:
-    - 223.5.5.5
-    - 119.29.29.29
   nameserver:
     - 223.5.5.5
     - 119.29.29.29
-    - 180.76.76.76
-    - https://dns.alidns.com/dns-query
-  fallback:
     - 1.1.1.1
     - 8.8.8.8
-    - https://1.1.1.1/dns-query
-    - https://dns.google/dns-query
-  fallback-filter:
-    geoip: true
-    geoip-code: CN
-    ipcidr:
-      - 240.0.0.0/4
 
-# 节点配置列表 (自动注入全部 Xray 与 Hysteria 节点)
+# 节点配置列表
 proxies:
   - name: "Xray-VLESS-01"
     type: vless
@@ -46,13 +31,22 @@ proxies:
     skip-cert-verify: true
     servername: "www.yahoo.com"
     client-fingerprint: "chrome"
-    network: xhttp
+    alpn:
+      - h2
+    network: splithttp
     reality-opts:
       public-key: "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg"
       short-id: "21569dd6"
+    splithttp-opts:
+      path: "/OCrp5Ajs"
+      mode: "auto"
+      headers:
+        Host: "www.yahoo.com"
     xhttp-opts:
       path: "/OCrp5Ajs"
       mode: "auto"
+      headers:
+        Host: "www.yahoo.com"
   - name: "Xray-VLESS-02"
     type: vless
     server: "62.210.70.194"
@@ -63,13 +57,22 @@ proxies:
     skip-cert-verify: true
     servername: "www.yahoo.com"
     client-fingerprint: "chrome"
-    network: xhttp
+    alpn:
+      - h2
+    network: splithttp
     reality-opts:
       public-key: "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg"
       short-id: "21569dd6"
+    splithttp-opts:
+      path: "/OCrp5Ajs"
+      mode: "auto"
+      headers:
+        Host: "www.yahoo.com"
     xhttp-opts:
       path: "/OCrp5Ajs"
       mode: "auto"
+      headers:
+        Host: "www.yahoo.com"
   - name: "Xray-VLESS-03"
     type: vless
     server: "62.210.70.194"
@@ -80,13 +83,22 @@ proxies:
     skip-cert-verify: true
     servername: "www.yahoo.com"
     client-fingerprint: "chrome"
-    network: xhttp
+    alpn:
+      - h2
+    network: splithttp
     reality-opts:
       public-key: "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg"
       short-id: "21569dd6"
+    splithttp-opts:
+      path: "/OCrp5Ajs"
+      mode: "auto"
+      headers:
+        Host: "www.yahoo.com"
     xhttp-opts:
       path: "/OCrp5Ajs"
       mode: "auto"
+      headers:
+        Host: "www.yahoo.com"
   - name: "Xray-VLESS-04"
     type: vless
     server: "62.210.70.194"
@@ -97,16 +109,25 @@ proxies:
     skip-cert-verify: true
     servername: "www.yahoo.com"
     client-fingerprint: "chrome"
-    network: xhttp
+    alpn:
+      - h2
+    network: splithttp
     reality-opts:
       public-key: "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg"
       short-id: "21569dd6"
+    splithttp-opts:
+      path: "/OCrp5Ajs"
+      mode: "auto"
+      headers:
+        Host: "www.yahoo.com"
     xhttp-opts:
       path: "/OCrp5Ajs"
       mode: "auto"
+      headers:
+        Host: "www.yahoo.com"
   - name: "Xray-VLESS-05"
     type: vless
-    server: "2001:bc8:32d7:302::14"
+    server: "62.210.70.194"
     port: 37783
     uuid: "a289c660-1b12-432b-a06c-c2ae469272b0"
     udp: true
@@ -114,16 +135,25 @@ proxies:
     skip-cert-verify: true
     servername: "www.yahoo.com"
     client-fingerprint: "chrome"
-    network: xhttp
+    alpn:
+      - h2
+    network: splithttp
     reality-opts:
       public-key: "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg"
       short-id: "21569dd6"
+    splithttp-opts:
+      path: "/OCrp5Ajs"
+      mode: "auto"
+      headers:
+        Host: "www.yahoo.com"
     xhttp-opts:
       path: "/OCrp5Ajs"
       mode: "auto"
+      headers:
+        Host: "www.yahoo.com"
   - name: "Xray-VLESS-06"
     type: vless
-    server: "2001:bc8:32d7:302::14"
+    server: "62.210.70.194"
     port: 37783
     uuid: "a289c660-1b12-432b-a06c-c2ae469272b0"
     udp: true
@@ -131,16 +161,25 @@ proxies:
     skip-cert-verify: true
     servername: "www.yahoo.com"
     client-fingerprint: "chrome"
-    network: xhttp
+    alpn:
+      - h2
+    network: splithttp
     reality-opts:
       public-key: "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg"
       short-id: "21569dd6"
+    splithttp-opts:
+      path: "/OCrp5Ajs"
+      mode: "auto"
+      headers:
+        Host: "www.yahoo.com"
     xhttp-opts:
       path: "/OCrp5Ajs"
       mode: "auto"
+      headers:
+        Host: "www.yahoo.com"
   - name: "Xray-VLESS-07"
     type: vless
-    server: "2001:bc8:32d7:302::14"
+    server: "62.210.70.194"
     port: 37783
     uuid: "a289c660-1b12-432b-a06c-c2ae469272b0"
     udp: true
@@ -148,16 +187,25 @@ proxies:
     skip-cert-verify: true
     servername: "www.yahoo.com"
     client-fingerprint: "chrome"
-    network: xhttp
+    alpn:
+      - h2
+    network: splithttp
     reality-opts:
       public-key: "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg"
       short-id: "21569dd6"
+    splithttp-opts:
+      path: "/OCrp5Ajs"
+      mode: "auto"
+      headers:
+        Host: "www.yahoo.com"
     xhttp-opts:
       path: "/OCrp5Ajs"
       mode: "auto"
+      headers:
+        Host: "www.yahoo.com"
   - name: "Xray-VLESS-08"
     type: vless
-    server: "2001:bc8:32d7:302::14"
+    server: "62.210.70.194"
     port: 37783
     uuid: "a289c660-1b12-432b-a06c-c2ae469272b0"
     udp: true
@@ -165,65 +213,22 @@ proxies:
     skip-cert-verify: true
     servername: "www.yahoo.com"
     client-fingerprint: "chrome"
-    network: xhttp
+    alpn:
+      - h2
+    network: splithttp
     reality-opts:
       public-key: "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg"
       short-id: "21569dd6"
+    splithttp-opts:
+      path: "/OCrp5Ajs"
+      mode: "auto"
+      headers:
+        Host: "www.yahoo.com"
     xhttp-opts:
       path: "/OCrp5Ajs"
       mode: "auto"
-  - name: "Hysteria-01"
-    type: hysteria
-    server: "62.210.70.191"
-    port: 23556
-    auth-str: "github.com/Alvin9999-newpac/fanqiang"
-    sni: "bing.com"
-    skip-cert-verify: true
-    alpn:
-      - h3
-    protocol: udp
-    up: "11 Mbps"
-    down: "55 Mbps"
-    fast-open: true
-  - name: "Hysteria-02"
-    type: hysteria
-    server: "163.172.117.163"
-    port: 36699
-    auth-str: "dongtaiwang.com"
-    sni: "bing.com"
-    skip-cert-verify: true
-    alpn:
-      - h3
-    protocol: udp
-    up: "11 Mbps"
-    down: "55 Mbps"
-    fast-open: true
-  - name: "Hysteria-03"
-    type: hysteria
-    server: "62.210.70.191"
-    port: 23556
-    auth-str: "github.com/Alvin9999-newpac/fanqiang"
-    sni: "bing.com"
-    skip-cert-verify: true
-    alpn:
-      - h3
-    protocol: udp
-    up: "11 Mbps"
-    down: "55 Mbps"
-    fast-open: true
-  - name: "Hysteria-04"
-    type: hysteria
-    server: "62.210.70.191"
-    port: 23556
-    auth-str: "github.com/Alvin9999-newpac/fanqiang"
-    sni: "bing.com"
-    skip-cert-verify: true
-    alpn:
-      - h3
-    protocol: udp
-    up: "11 Mbps"
-    down: "55 Mbps"
-    fast-open: true
+      headers:
+        Host: "www.yahoo.com"
 
 # 策略组配置
 proxy-groups:
@@ -241,10 +246,6 @@ proxy-groups:
       - "Xray-VLESS-06"
       - "Xray-VLESS-07"
       - "Xray-VLESS-08"
-      - "Hysteria-01"
-      - "Hysteria-02"
-      - "Hysteria-03"
-      - "Hysteria-04"
 
   - name: ♻️ 自动选择
     type: url-test
@@ -260,10 +261,6 @@ proxy-groups:
       - "Xray-VLESS-06"
       - "Xray-VLESS-07"
       - "Xray-VLESS-08"
-      - "Hysteria-01"
-      - "Hysteria-02"
-      - "Hysteria-03"
-      - "Hysteria-04"
 
   - name: ⚖️ 负载均衡
     type: load-balance
@@ -279,10 +276,6 @@ proxy-groups:
       - "Xray-VLESS-06"
       - "Xray-VLESS-07"
       - "Xray-VLESS-08"
-      - "Hysteria-01"
-      - "Hysteria-02"
-      - "Hysteria-03"
-      - "Hysteria-04"
 
   - name: 🎯 全球直连
     type: select
@@ -296,8 +289,10 @@ proxy-groups:
       - 🚀 节点选择
       - 🎯 全球直连
 
-# 分流规则
+# 分流规则 (纯标准规则，免 GeoIP 依赖，杜绝任何客户端报错)
 rules:
-  - GEOIP,LAN,DIRECT,no-resolve
-  - GEOIP,CN,DIRECT
+  - IP-CIDR,127.0.0.0/8,DIRECT,no-resolve
+  - IP-CIDR,192.168.0.0/16,DIRECT,no-resolve
+  - IP-CIDR,10.0.0.0/8,DIRECT,no-resolve
+  - IP-CIDR,172.16.0.0/12,DIRECT,no-resolve
   - MATCH,🚀 节点选择

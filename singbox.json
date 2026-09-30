@@ -10,6 +10,7 @@
       "tls": {
         "enabled": true,
         "server_name": "www.yahoo.com",
+        "insecure": true,
         "utls": {
           "enabled": true,
           "fingerprint": "chrome"
@@ -21,9 +22,11 @@
         }
       },
       "transport": {
-        "type": "xhttp",
+        "type": "http",
         "path": "/OCrp5Ajs",
-        "mode": "auto"
+        "host": [
+          "www.yahoo.com"
+        ]
       }
     },
     {
@@ -36,6 +39,7 @@
       "tls": {
         "enabled": true,
         "server_name": "www.yahoo.com",
+        "insecure": true,
         "utls": {
           "enabled": true,
           "fingerprint": "chrome"
@@ -47,9 +51,11 @@
         }
       },
       "transport": {
-        "type": "xhttp",
+        "type": "http",
         "path": "/OCrp5Ajs",
-        "mode": "auto"
+        "host": [
+          "www.yahoo.com"
+        ]
       }
     },
     {
@@ -62,6 +68,7 @@
       "tls": {
         "enabled": true,
         "server_name": "www.yahoo.com",
+        "insecure": true,
         "utls": {
           "enabled": true,
           "fingerprint": "chrome"
@@ -73,9 +80,11 @@
         }
       },
       "transport": {
-        "type": "xhttp",
+        "type": "http",
         "path": "/OCrp5Ajs",
-        "mode": "auto"
+        "host": [
+          "www.yahoo.com"
+        ]
       }
     },
     {
@@ -88,6 +97,7 @@
       "tls": {
         "enabled": true,
         "server_name": "www.yahoo.com",
+        "insecure": true,
         "utls": {
           "enabled": true,
           "fingerprint": "chrome"
@@ -99,21 +109,24 @@
         }
       },
       "transport": {
-        "type": "xhttp",
+        "type": "http",
         "path": "/OCrp5Ajs",
-        "mode": "auto"
+        "host": [
+          "www.yahoo.com"
+        ]
       }
     },
     {
       "type": "vless",
       "tag": "Xray-VLESS-05",
-      "server": "2001:bc8:32d7:302::14",
+      "server": "62.210.70.194",
       "server_port": 37783,
       "uuid": "a289c660-1b12-432b-a06c-c2ae469272b0",
       "flow": "",
       "tls": {
         "enabled": true,
         "server_name": "www.yahoo.com",
+        "insecure": true,
         "utls": {
           "enabled": true,
           "fingerprint": "chrome"
@@ -125,21 +138,24 @@
         }
       },
       "transport": {
-        "type": "xhttp",
+        "type": "http",
         "path": "/OCrp5Ajs",
-        "mode": "auto"
+        "host": [
+          "www.yahoo.com"
+        ]
       }
     },
     {
       "type": "vless",
       "tag": "Xray-VLESS-06",
-      "server": "2001:bc8:32d7:302::14",
+      "server": "62.210.70.194",
       "server_port": 37783,
       "uuid": "a289c660-1b12-432b-a06c-c2ae469272b0",
       "flow": "",
       "tls": {
         "enabled": true,
         "server_name": "www.yahoo.com",
+        "insecure": true,
         "utls": {
           "enabled": true,
           "fingerprint": "chrome"
@@ -151,21 +167,24 @@
         }
       },
       "transport": {
-        "type": "xhttp",
+        "type": "http",
         "path": "/OCrp5Ajs",
-        "mode": "auto"
+        "host": [
+          "www.yahoo.com"
+        ]
       }
     },
     {
       "type": "vless",
       "tag": "Xray-VLESS-07",
-      "server": "2001:bc8:32d7:302::14",
+      "server": "62.210.70.194",
       "server_port": 37783,
       "uuid": "a289c660-1b12-432b-a06c-c2ae469272b0",
       "flow": "",
       "tls": {
         "enabled": true,
         "server_name": "www.yahoo.com",
+        "insecure": true,
         "utls": {
           "enabled": true,
           "fingerprint": "chrome"
@@ -177,21 +196,24 @@
         }
       },
       "transport": {
-        "type": "xhttp",
+        "type": "http",
         "path": "/OCrp5Ajs",
-        "mode": "auto"
+        "host": [
+          "www.yahoo.com"
+        ]
       }
     },
     {
       "type": "vless",
       "tag": "Xray-VLESS-08",
-      "server": "2001:bc8:32d7:302::14",
+      "server": "62.210.70.194",
       "server_port": 37783,
       "uuid": "a289c660-1b12-432b-a06c-c2ae469272b0",
       "flow": "",
       "tls": {
         "enabled": true,
         "server_name": "www.yahoo.com",
+        "insecure": true,
         "utls": {
           "enabled": true,
           "fingerprint": "chrome"
@@ -203,78 +225,12 @@
         }
       },
       "transport": {
-        "type": "xhttp",
+        "type": "http",
         "path": "/OCrp5Ajs",
-        "mode": "auto"
+        "host": [
+          "www.yahoo.com"
+        ]
       }
-    },
-    {
-      "type": "hysteria",
-      "tag": "Hysteria-01",
-      "server": "62.210.70.191",
-      "server_port": 23556,
-      "auth_str": "github.com/Alvin9999-newpac/fanqiang",
-      "tls": {
-        "enabled": true,
-        "server_name": "bing.com",
-        "insecure": true,
-        "alpn": [
-          "h3"
-        ]
-      },
-      "up_mbps": 11,
-      "down_mbps": 55
-    },
-    {
-      "type": "hysteria",
-      "tag": "Hysteria-02",
-      "server": "163.172.117.163",
-      "server_port": 36699,
-      "auth_str": "dongtaiwang.com",
-      "tls": {
-        "enabled": true,
-        "server_name": "bing.com",
-        "insecure": true,
-        "alpn": [
-          "h3"
-        ]
-      },
-      "up_mbps": 11,
-      "down_mbps": 55
-    },
-    {
-      "type": "hysteria",
-      "tag": "Hysteria-03",
-      "server": "62.210.70.191",
-      "server_port": 23556,
-      "auth_str": "github.com/Alvin9999-newpac/fanqiang",
-      "tls": {
-        "enabled": true,
-        "server_name": "bing.com",
-        "insecure": true,
-        "alpn": [
-          "h3"
-        ]
-      },
-      "up_mbps": 11,
-      "down_mbps": 55
-    },
-    {
-      "type": "hysteria",
-      "tag": "Hysteria-04",
-      "server": "62.210.70.191",
-      "server_port": 23556,
-      "auth_str": "github.com/Alvin9999-newpac/fanqiang",
-      "tls": {
-        "enabled": true,
-        "server_name": "bing.com",
-        "insecure": true,
-        "alpn": [
-          "h3"
-        ]
-      },
-      "up_mbps": 11,
-      "down_mbps": 55
     }
   ]
 }

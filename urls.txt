@@ -1,15 +1,17 @@
-# 4 个脚本提取的 8 个 Xray 节点配置源
+# 4 个批处理脚本提取的 8 个 Xray 节点配置源 (对应 8 个独立节点)
+
+# 文档 1 (节点 1 & 节点 2)
 https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ip/xray/1/config.json
 https://www.67867867.xyz/Alvin9999/PAC/refs/heads/master/backup/img/1/2/ip/xray/1/config.json
+
+# 文档 2 (节点 3 & 节点 4)
 https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ip/xray/2/config.json
 https://www.67867867.xyz/Alvin9999/PAC/refs/heads/master/backup/img/1/2/ip/xray/2/config.json
+
+# 文档 3 (节点 5 & 节点 6)
 https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ip/xray/3/config.json
 https://www.67867867.xyz/Alvin9999/PAC/refs/heads/master/backup/img/1/2/ip/xray/3/config.json
+
+# 文档 4 (节点 7 & 节点 8)
 https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ip/xray/4/config.json
 https://www.67867867.xyz/Alvin9999/PAC/refs/heads/master/backup/img/1/2/ip/xray/4/config.json
-
-# 备用高速 Hysteria 节点源 (全面兼容 Karing 客户端)
-https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ip/clash.meta2/1/config.yaml
-https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ip/clash.meta2/2/config.yaml
-https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ip/clash.meta2/3/config.yaml
-https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ip/clash.meta2/4/config.yaml
