@@ -38,7 +38,23 @@ proxies:
     xhttp-opts:
       path: "/OCrp5Ajs"
       mode: "auto"
-  - name: "Xray-VLESS-IPv6-02"
+  - name: "Xray-VLESS-IPv4-02"
+    type: vless
+    server: "62.210.70.194"
+    port: 37783
+    uuid: "a289c660-1b12-432b-a06c-c2ae469272b0"
+    udp: true
+    tls: true
+    servername: "www.yahoo.com"
+    client-fingerprint: "chrome"
+    network: xhttp
+    reality-opts:
+      public-key: "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg"
+      short-id: "21569dd6"
+    xhttp-opts:
+      path: "/OCrp5Ajs"
+      mode: "auto"
+  - name: "Xray-VLESS-IPv6-03"
     type: vless
     server: "2001:bc8:32d7:302::14"
     port: 37783
@@ -54,6 +70,38 @@ proxies:
     xhttp-opts:
       path: "/OCrp5Ajs"
       mode: "auto"
+  - name: "Xray-VLESS-IPv6-04"
+    type: vless
+    server: "2001:bc8:32d7:302::14"
+    port: 37783
+    uuid: "a289c660-1b12-432b-a06c-c2ae469272b0"
+    udp: true
+    tls: true
+    servername: "www.yahoo.com"
+    client-fingerprint: "chrome"
+    network: xhttp
+    reality-opts:
+      public-key: "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg"
+      short-id: "21569dd6"
+    xhttp-opts:
+      path: "/OCrp5Ajs"
+      mode: "auto"
+  - name: "Xray-VLESS-Backup-05"
+    type: vless
+    server: "62.210.113.151"
+    port: 45641
+    uuid: "f2d9e117-231c-4946-87d8-2cde2222b85d"
+    udp: true
+    tls: true
+    servername: "www.lovelive-anime.jp"
+    client-fingerprint: "chrome"
+    network: xhttp
+    reality-opts:
+      public-key: "Nw-FuuCWzFZvQtQbJjDCYJpCKyO8cuvibbTGBeoZRyo"
+      short-id: "1ea5bfb5"
+    xhttp-opts:
+      path: "/SSSuqkzN"
+      mode: "auto"
 
 # 策略组配置
 proxy-groups:
@@ -64,7 +112,10 @@ proxy-groups:
       - ⚖️ 负载均衡
       - DIRECT
       - "Xray-VLESS-IPv4-01"
-      - "Xray-VLESS-IPv6-02"
+      - "Xray-VLESS-IPv4-02"
+      - "Xray-VLESS-IPv6-03"
+      - "Xray-VLESS-IPv6-04"
+      - "Xray-VLESS-Backup-05"
 
   - name: ♻️ 自动选择
     type: url-test
@@ -73,7 +124,10 @@ proxy-groups:
     tolerance: 50
     proxies:
       - "Xray-VLESS-IPv4-01"
-      - "Xray-VLESS-IPv6-02"
+      - "Xray-VLESS-IPv4-02"
+      - "Xray-VLESS-IPv6-03"
+      - "Xray-VLESS-IPv6-04"
+      - "Xray-VLESS-Backup-05"
 
   - name: ⚖️ 负载均衡
     type: load-balance
@@ -82,7 +136,10 @@ proxy-groups:
     interval: 300
     proxies:
       - "Xray-VLESS-IPv4-01"
-      - "Xray-VLESS-IPv6-02"
+      - "Xray-VLESS-IPv4-02"
+      - "Xray-VLESS-IPv6-03"
+      - "Xray-VLESS-IPv6-04"
+      - "Xray-VLESS-Backup-05"
 
   - name: 🎯 全球直连
     type: select

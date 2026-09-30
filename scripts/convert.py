@@ -1,17 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-GitHub Actions 自动化转换脚本 (Xray VLESS Reality 智能提取版)：
-1. 自动读取 urls.txt，精准提取全部 Xray URL 配置源 (支持 GitLab 与镜像源主备容灾)
-2. 实时从 upstream 下载真实动态 Xray 配置：
-   - 提取 VLESS + Reality + XHTTP / TCP 节点
-   - 包含 IPv4 (62.210.70.194) 与 IPv6 节点
-3. 完美兼容 Clash Meta (Mihomo)、Karing、v2rayN、Sing-Box 与 Shadowrocket：
-   - 生成完整 Clash Meta 订阅 (config.yaml / clash.yaml)
-   - 生成原生 Xray 客户端配置 (xray_config.json)
-   - 生成标准 VLESS URI 明文清单 (xray_links.txt)
-   - 生成 Base64 通用订阅 (sub.txt / config.b64)
-   - 生成 Sing-Box 格式配置 (singbox.json)
+GitHub Actions 自动化转换脚本 (Xray VLESS Reality 增强版)：
+1. 自动提取 urls.txt 中的全部 Xray 配置，完整保留后量子加密 (mlkem768) 与 xhttp 传输协议；
+2. 包含 4 组上游节点 + 备用自定义节点，确保节点列表完整；
+3. 输出 Clash Meta / Karing、Xray 官方 JSON、Base64 通用订阅与 Sing-Box 格式。
 """
 
 import os
@@ -36,15 +29,6 @@ XRAY_LINKS_TXT = os.path.join(BASE_DIR, "xray_links.txt")
 SINGBOX_OUTPUT = os.path.join(BASE_DIR, "singbox.json")
 SUB_OUTPUT = os.path.join(BASE_DIR, "sub.txt")
 
-# Clean up legacy hy2 artifacts if they exist
-for legacy in ["hy2_config.yaml", "hy2_config.b64", "hy2_links.txt"]:
-    legacy_path = os.path.join(BASE_DIR, legacy)
-    if os.path.exists(legacy_path):
-        try:
-            os.remove(legacy_path)
-        except Exception:
-            pass
-
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
 TIMEOUT = 8
 
@@ -65,7 +49,7 @@ def extract_all_urls(file_path):
     return urls
 
 def fetch_upstream_content(url):
-    """从真实 URL 动态下载最新的配置 (支持 JSON 与 YAML)"""
+    """从真实 URL 动态下载最新的配置"""
     ctx = ssl.create_default_context()
     ctx.check_hostname = False
     ctx.verify_mode = ssl.CERT_NONE
@@ -76,11 +60,11 @@ def fetch_upstream_content(url):
                 content = response.read().decode("utf-8").strip()
                 return content
     except Exception as e:
-        print(f"  [-] 请求失败: {e}")
+        print(f"  [-] 请求失败 {url}: {e}")
     return None
 
 def parse_xray_node(content, default_name):
-    """从 Xray config.json 中精准解析 VLESS Reality 节点"""
+    """从 Xray config.json 中精准解析 VLESS Reality 节点 (含后量子加密密钥)"""
     if not content:
         return None, None, None
     
@@ -94,7 +78,6 @@ def parse_xray_node(content, default_name):
     if not outbounds:
         return None, None, None
     
-    # 查找主代理 outbound (protocol 为 vless / vmess / trojan 等)
     proxy_ob = None
     for ob in outbounds:
         proto = str(ob.get("protocol", "")).lower()
@@ -112,6 +95,7 @@ def parse_xray_node(content, default_name):
     server = "62.210.70.194"
     port = 37783
     uuid = "a289c660-1b12-432b-a06c-c2ae469272b0"
+    encryption = "none"
     flow = ""
     
     if vnext and isinstance(vnext, list) and len(vnext) > 0:
@@ -121,6 +105,7 @@ def parse_xray_node(content, default_name):
         users = vn0.get("users", [])
         if users and len(users) > 0:
             uuid = str(users[0].get("id", uuid))
+            encryption = str(users[0].get("encryption", "none"))
             flow = str(users[0].get("flow", ""))
     
     stream = proxy_ob.get("streamSettings", {})
@@ -176,10 +161,11 @@ def parse_xray_node(content, default_name):
             "grpc-service-name": stream.get("grpcSettings", {}).get("serviceName", "")
         }
 
-    # 2. 生成标准 VLESS URI 链接
+    # 2. 生成标准 VLESS URI 链接 (携带加密参数)
     query_parts = [
-        f"type={quote(network)}",
+        f"encryption={quote(encryption)}",
         f"security={quote(security)}",
+        f"type={quote(network)}",
         f"pbk={quote(public_key)}",
         f"fp={quote(fingerprint)}",
         f"sni={quote(sni)}",
@@ -227,7 +213,7 @@ def parse_xray_node(content, default_name):
     return clash_proxy, uri, singbox_node
 
 def dump_yaml_proxies(proxies):
-    """将代理列表序列化为高兼容 YAML 格式 (完全兼容 Clash Meta 与 Karing)"""
+    """序列化为 Clash Meta YAML"""
     lines = []
     for p in proxies:
         lines.append(f"  - name: \"{p['name']}\"")
@@ -256,7 +242,7 @@ def dump_yaml_proxies(proxies):
     return "\n".join(lines)
 
 def render_template(template_str, proxies):
-    """渲染完整的 Clash Meta 策略组与分流规则"""
+    """渲染完整订阅配置"""
     if not proxies:
         return template_str.replace("{{proxies}}", "  # 暂无可用节点\n").replace("{{proxy_names_indented}}", "      - DIRECT")
 
@@ -285,83 +271,64 @@ def main():
     all_singbox_nodes = []
     first_raw_json = None
 
-    seen_endpoints = set()
-
+    # 分别为 4 个节点序号生成独立节点（即使上游 IP 相同也保留 4 个订阅槽位）
+    node_configs = {}
     for u in urls:
-        print(f"[*] 正在处理: {u}")
-        content = fetch_upstream_content(u)
-        if not content:
+        m = re.search(r"/xray/(\d+)/", u)
+        slot_idx = int(m.group(1)) if m else (len(node_configs) + 1)
+        if slot_idx in node_configs:
             continue
+        print(f"[*] 正在拉取 节点槽位 [{slot_idx}]: {u}")
+        content = fetch_upstream_content(u)
+        if content:
+            node_configs[slot_idx] = content
+            if not first_raw_json:
+                try:
+                    first_raw_json = json.loads(content)
+                except Exception:
+                    pass
 
-        if not first_raw_json:
-            try:
-                first_raw_json = json.loads(content)
-            except Exception:
-                pass
-
-        default_name = f"Xray-VLESS-{len(all_clash_proxies)+1:02d}"
-        clash_p, uri, singbox_n = parse_xray_node(content, default_name)
-
+    for slot_idx in sorted(node_configs.keys()):
+        content = node_configs[slot_idx]
+        slot_name = f"Xray-VLESS-{'IPv4' if slot_idx <= 2 else 'IPv6'}-0{slot_idx}"
+        clash_p, uri, singbox_n = parse_xray_node(content, slot_name)
         if clash_p:
-            endpoint = f"{clash_p['server']}_{clash_p['port']}"
-            if endpoint not in seen_endpoints:
-                seen_endpoints.add(endpoint)
-                is_v6 = ":" in clash_p["server"]
-                clash_p["name"] = f"Xray-VLESS-{'IPv6' if is_v6 else 'IPv4'}-{len(all_clash_proxies)+1:02d}"
-                singbox_n["tag"] = clash_p["name"]
-                
-                all_clash_proxies.append(clash_p)
-                all_uris.append(uri)
-                all_singbox_nodes.append(singbox_n)
-                print(f"  [√] 成功解析 Xray 节点: {clash_p['name']} ➔ {clash_p['server']}:{clash_p['port']} (Network: {clash_p.get('network')}, SNI: {clash_p.get('servername')})")
+            all_clash_proxies.append(clash_p)
+            all_uris.append(uri)
+            all_singbox_nodes.append(singbox_n)
+            print(f"  [√] 成功生成节点 {slot_name}: {clash_p['server']}:{clash_p['port']} (Network: {clash_p.get('network')}, SNI: {clash_p.get('servername')})")
 
-    # 兜底默认备用节点 (确保无论网络状况如何均有完整节点)
-    if not all_clash_proxies:
-        print("[!] 上游临时未响应，注入标准稳定 VLESS 节点作为备用...")
-        fallback_v4 = {
-            "name": "Xray-VLESS-IPv4-01",
-            "type": "vless",
-            "server": "62.210.70.194",
-            "port": 37783,
-            "uuid": "a289c660-1b12-432b-a06c-c2ae469272b0",
-            "udp": True,
-            "tls": True,
-            "flow": "",
-            "servername": "www.yahoo.com",
-            "client-fingerprint": "chrome",
-            "network": "xhttp",
-            "reality-opts": {
-                "public-key": "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg",
-                "short-id": "21569dd6"
-            },
-            "xhttp-opts": {
-                "path": "/OCrp5Ajs",
-                "mode": "auto"
-            }
-        }
-        all_clash_proxies.append(fallback_v4)
-        uri_fallback = "vless://a289c660-1b12-432b-a06c-c2ae469272b0@62.210.70.194:37783?type=xhttp&security=reality&pbk=tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg&fp=chrome&sni=www.yahoo.com&sid=21569dd6&path=%2FOCrp5Ajs&mode=auto#Xray-VLESS-IPv4-01"
-        all_uris.append(uri_fallback)
-        all_singbox_nodes.append({
-            "type": "vless",
-            "tag": "Xray-VLESS-IPv4-01",
-            "server": "62.210.70.194",
-            "server_port": 37783,
-            "uuid": "a289c660-1b12-432b-a06c-c2ae469272b0",
-            "tls": {
-                "enabled": True,
-                "server_name": "www.yahoo.com",
-                "utls": {"enabled": True, "fingerprint": "chrome"},
-                "reality": {
-                    "enabled": True,
-                    "public_key": "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg",
-                    "short_id": "21569dd6"
-                }
-            },
-            "transport": {"type": "xhttp", "path": "/OCrp5Ajs", "mode": "auto"}
-        })
+    # 注入用户专属备用节点 (lovelive 备用线路)
+    user_backup_json = """{
+      "tag": "proxy",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [{
+          "address": "62.210.113.151",
+          "port": 45641,
+          "users": [{ "id": "f2d9e117-231c-4946-87d8-2cde2222b85d", "encryption": "mlkem768x25519plus.native.0rtt.zSYuX7pyA0rEd8VpVAxu72mLwTrKQuScjFWKPCaaMsKlB6CBmEllLAhj1mk37vQNJvma7Fs51ukzsqU3-honW3JM8cOiZNsxc-U3DJgbS8CZthsH4blkJlXEz6PPnGlrLQZozdkQ4oh5NeNE8uwYgdUFCnKyrhWKqGaM1JmbWgdFqpFqI5u0SDt_IdBdTxlptLa8MfW00Osz-jy74bW8DFq1vbJlQ0pLkNBdL-xCPMANIQY0yLsaFWN0uUp5pSWbc7XNRqHK2Xeuzvyw9px4HiBfG4q3VWXCL_hXr5NNHHQAjaBamSGI6ZIcE2RqgOGM-Ow3xPjBjvqBSeYzgYBMsBDP0sdRLrcAY6k6TZOlHNEgkxwgiMpXpYOuTGSsSLmuYxiIAH1DWJagU_NsJtVOZUKLtio263GFxXsJdVyBc_ACYEFheLBWBCUQBwYQIudfStHFQ2GCQaF64DOOrFcWacABMdY0qOIMPPyLVVJKjdF74OisuilVQmAs_bNIQ_CXnYkGJwlI_aVKJomFiHHOLkc5F2iiYdQuK4AaIumpqskx0MNxKotbyuxtA0MVRVucjmVyVOgR4TZfHirLoMWVxuKIwpddKyZtAeA_zDuuS_BJUEWMbmh_etVkRYhze7N17bfC1ruFTBZCdKUEeoVXiAcr_4kmLtKAP7TDDVMpmZlDC9KiZWKGLYSVteULYoHBgAWN_RKYawNOivkECYEO75ho2vJAVLqNF2KKyuMxZXdfKFbJfrscfFqWAMy08UDOH-sQGNZwVzEsebgw5wsaORGlTfm-9HwlYpYwfKIrJIwfj1uLSuMGHTWMnLeJPLIOsXJuWgKGSigV2sCDZrZWg2K5ZanMg1WpuzS9FjGMt8Z2ACNyd0ZM9NpoofeBLGcomZF_X3akPxG60Nt3lMBOkapRnRk5-ekNCfpmeKFfTcYIvQenR8FMxehQjPmG-kSJWGRL4efCeSSBBlNsdwyjZRsxeOwYAeRqHQlwBrYFgcoyrYmRW6yo5ocQPfAtqxq6VjiVM2ljxjOjK6Sy1QGSfUGA51WQA6BNrDyj_YcVCBkfdZBwHQmv6bTLKDZsFdY6FPmDOmsgM6MAxnEO6FuZQfcWb2Zm_zoTHhguW_oU7dsGEaKZ2Ns3Q5CAPYNRwDG5AI1Wh5VI-1ctFjpT8jtX3AC-46R7LkxUONddX8mHQ5BjKcwSNuDLOmOYRZm6ZrYHCYF6vXpZHNbIcdI5gUkxWANI8Hh2qTBuiQZ6t4qH2BGEsuwPAuZ6a3wzGmzCoTI-HyVAinhXohcsTjka62E7osQt11wTFnkVjBNGb-d-I4c6YRh31SRjnirG0esDWly7qcB3zEy0RMSshISKsNFRdeFfGPe4x5zD0cMvo4E3rQQ9xHJlckg4s5uCO4dk_cgcSeYHZZgADJErzIeRZpA9f-XBjNqdIFpnJAyzCMC9D2Msi8cXKys2kiJWiqyo1hAlr7YWEMC2JozJ7WlrNAFRmTsujSsdEvZoeECLmasq7eUvGmoMrFBsSIrBGXJBHdqzWx1z57id_4o81ihH0MA0yYW_67JZn7nFG0htFqUnyac" }]
+        }]
+      },
+      "streamSettings": {
+        "network": "xhttp",
+        "security": "reality",
+        "realitySettings": { "serverName": "www.lovelive-anime.jp", "fingerprint": "chrome", "publicKey": "Nw-FuuCWzFZvQtQbJjDCYJpCKyO8cuvibbTGBeoZRyo", "shortId": "1ea5bfb5" },
+        "xhttpSettings": { "path": "/SSSuqkzN", "mode": "auto" }
+      }
+    }"""
+    try:
+        user_backup_dict = json.loads(user_backup_json)
+        full_wrapped = {"outbounds": [user_backup_dict]}
+        clash_u, uri_u, sing_u = parse_xray_node(json.dumps(full_wrapped), "Xray-VLESS-Backup-05")
+        if clash_u:
+            all_clash_proxies.append(clash_u)
+            all_uris.append(uri_u)
+            all_singbox_nodes.append(sing_u)
+            print(f"  [√] 成功注入用户自定义备用节点: {clash_u['name']} ➔ {clash_u['server']}:{clash_u['port']}")
+    except Exception as e:
+        print(f"[!] 注入备用节点失败: {e}")
 
-    print(f"\n[=] 总计成功生成 {len(all_clash_proxies)} 个真实 Xray VLESS 节点 (包含 IPv4 与 IPv6)")
+    print(f"\n[=] 总计成功生成 {len(all_clash_proxies)} 个完整 Xray 节点！")
 
     # 1. 写入明文链接 (xray_links.txt)
     uris_text = "\n".join(all_uris)
@@ -442,7 +409,7 @@ def main():
         print(f"[!] 生成 Sing-Box 失败: {e}")
 
     print("=" * 65)
-    print("✨ Xray (VLESS Reality) 全套订阅生成完成！")
+    print(f"✨ 成功提取并生成 {len(all_clash_proxies)} 个完整 Xray 节点！")
     print("=" * 65)
 
 if __name__ == "__main__":
