@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-GitHub Actions 自动化转换脚本 (8 个独立 Xray 节点极致兼容版)：
-1. 从 4 个文档的 8 个 URL 中逐一提取并生成 8 个独立节点 (Xray-VLESS-01 ~ Xray-VLESS-08)；
-2. 修复 Android Karing 与 Clash Meta 握手：
-   - 显式声明 ALPN: [h2]；
-   - 双重注入 network: splithttp 与 xhttp-opts / splithttp-opts；
-   - 注入 Host: www.yahoo.com 伪装头部；
-   - 针对 IPv6 节点自动兼容 IPv4 路由，确保无论什么手机网络都能 100% 连通测速；
-   - 策略组与分流完全移除 mmdb 依赖，杜绝客户端加载报错。
+GitHub Actions 自动化转换脚本：
+严格按照原生 Xray 配置模板，从 8 个 URL 获取真实节点配置，精准生成 8 个原生节点与各端订阅：
+1. 原生多节点与独立配置 (xray_config.json 及 xray_1~8.json)；
+2. 标准 Clash Meta / Karing 订阅 (config.yaml 与 clash.yaml)；
+3. 通用标准 VLESS 明文链接 (xray_links.txt)；
+4. 通用 Base64 订阅 (sub.txt 与 config.b64)；
+5. Sing-Box 原生配置 (singbox.json)。
 """
 
 import os
 import re
 import sys
 import json
+import copy
 import base64
 import datetime
 import ssl
@@ -23,7 +23,7 @@ import urllib.request
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 URLS_FILE = os.path.join(BASE_DIR, "urls.txt")
-TEMPLATE_FILE = os.path.join(BASE_DIR, "template.yaml")
+TEMPLATE_YAML_FILE = os.path.join(BASE_DIR, "template.yaml")
 
 CONFIG_YAML = os.path.join(BASE_DIR, "config.yaml")
 CONFIG_B64 = os.path.join(BASE_DIR, "config.b64")
@@ -36,8 +36,60 @@ SUB_OUTPUT = os.path.join(BASE_DIR, "sub.txt")
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
 TIMEOUT = 8
 
+# 用户提供的原生标准 Xray 完整配置模板
+NATIVE_XRAY_TEMPLATE = {
+    "log": { "loglevel": "warning" },
+    "dns": {
+        "hosts": {
+            "dns.google": ["8.8.8.8","8.8.4.4","2001:4860:4860::8888","2001:4860:4860::8844"],
+            "dns.alidns.com": ["223.5.5.5","223.6.6.6","2400:3200::1","2400:3200:baba::1"],
+            "one.one.one.one": ["1.1.1.1","1.0.0.1","2606:4700:4700::1111","2606:4700:4700::1001"],
+            "1dot1dot1dot1.cloudflare-dns.com": ["1.1.1.1","1.0.0.1","2606:4700:4700::1111","2606:4700:4700::1001"],
+            "cloudflare-dns.com": ["104.16.249.249","104.16.248.249","2606:4700::6810:f8f9","2606:4700::6810:f9f9"],
+            "dns.cloudflare.com": ["104.16.132.229","104.16.133.229","2606:4700::6810:84e5","2606:4700::6810:85e5"],
+            "dot.pub": ["1.12.12.12","120.53.53.53"],
+            "doh.pub": ["1.12.12.12","120.53.53.53"],
+            "dns.quad9.net": ["9.9.9.9","149.112.112.112","2620:fe::fe","2620:fe::9"],
+            "dns.umbrella.com": ["208.67.220.220","208.67.222.222","2620:119:35::35","2620:119:53::53"],
+            "engage.cloudflareclient.com": ["162.159.192.1","2606:4700:d0::a29f:c001"]
+        },
+        "servers": [
+            { "address": "https://dns.alidns.com/dns-query", "domains": ["geosite:private"], "skipFallback": True },
+            { "address": "223.5.5.5", "domains": ["full:dns.alidns.com","full:cloudflare-dns.com"], "skipFallback": True },
+            "https://cloudflare-dns.com/dns-query"
+        ]
+    },
+    "inbounds": [
+        {
+            "tag": "socks",
+            "port": 1080,
+            "listen": "127.0.0.1",
+            "protocol": "socks",
+            "sniffing": { "enabled": True, "destOverride": ["http","tls"], "routeOnly": False },
+            "settings": { "auth": "noauth", "udp": True }
+        },
+        {
+            "tag": "http",
+            "port": 1081,
+            "listen": "127.0.0.1",
+            "protocol": "http",
+            "sniffing": { "enabled": True, "destOverride": ["http","tls"], "routeOnly": False },
+            "settings": { "auth": "noauth" }
+        }
+    ],
+    "outbounds": [],
+    "routing": {
+        "domainStrategy": "AsIs",
+        "rules": [
+            { "type": "field", "outboundTag": "block", "ip": ["geoip:private"] },
+            { "type": "field", "outboundTag": "direct", "domain": ["geosite:private"] },
+            { "type": "field", "outboundTag": "proxy-01", "port": "0-65535" }
+        ]
+    }
+}
+
 def extract_all_urls(file_path):
-    """从 urls.txt 中提取全部 8 个 URL"""
+    """从 urls.txt 中提取全部 8 个 URL 链接"""
     urls = []
     if os.path.exists(file_path):
         with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
@@ -53,7 +105,7 @@ def extract_all_urls(file_path):
     return urls
 
 def fetch_upstream_content(url):
-    """从 URL 动态下载最新的配置"""
+    """从 URL 动态下载原生 Xray 配置"""
     ctx = ssl.create_default_context()
     ctx.check_hostname = False
     ctx.verify_mode = ssl.CERT_NONE
@@ -67,11 +119,16 @@ def fetch_upstream_content(url):
         print(f"  [-] 请求失败 {url}: {e}")
     return None
 
-def parse_xray_node(content, default_name, node_index):
-    """从 Xray JSON 中精准解析 VLESS Reality 节点参数"""
-    server = "62.210.70.194"
+def parse_node_details(content, idx):
+    """严格解析原生 Xray 配置中的 outbound 节点完整参数"""
+    node_tag = f"proxy-{idx:02d}"
+    node_name = f"Xray-VLESS-{idx:02d}"
+
+    # 默认回退值
+    server = "62.210.70.194" if idx <= 4 else "2001:bc8:32d7:302::14"
     port = 37783
     uuid = "a289c660-1b12-432b-a06c-c2ae469272b0"
+    encryption = "none"
     flow = ""
     sni = "www.yahoo.com"
     public_key = "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg"
@@ -80,29 +137,31 @@ def parse_xray_node(content, default_name, node_index):
     path = "/OCrp5Ajs"
     mode = "auto"
 
+    raw_outbound = None
+
     if content:
         try:
             data = json.loads(content)
             outbounds = data.get("outbounds", [])
             if outbounds:
-                proxy_ob = outbounds[0]
-                settings = proxy_ob.get("settings", {})
+                ob = outbounds[0]
+                raw_outbound = copy.deepcopy(ob)
+                raw_outbound["tag"] = node_tag
+
+                settings = ob.get("settings", {})
                 vnext = settings.get("vnext", [])
-                if vnext and isinstance(vnext, list) and len(vnext) > 0:
+                if vnext and len(vnext) > 0:
                     vn0 = vnext[0]
-                    raw_addr = str(vn0.get("address", server)).strip("[]")
-                    # 针对 IPv6 机器 (2001:bc8:...)，由于国内移动网络几乎均无法直连，统一桥接至该主机的公网 IPv4 (62.210.70.194)
-                    if ":" in raw_addr:
-                        server = "62.210.70.194"
-                    else:
-                        server = raw_addr
+                    server = str(vn0.get("address", server)).strip("[]")
                     port = int(vn0.get("port", port))
                     users = vn0.get("users", [])
-                    if users:
-                        uuid = str(users[0].get("id", uuid))
-                        flow = str(users[0].get("flow", ""))
+                    if users and len(users) > 0:
+                        u0 = users[0]
+                        uuid = str(u0.get("id", uuid))
+                        encryption = str(u0.get("encryption", encryption))
+                        flow = str(u0.get("flow", ""))
 
-                stream = proxy_ob.get("streamSettings", {})
+                stream = ob.get("streamSettings", {})
                 reality = stream.get("realitySettings", {})
                 if reality.get("serverName"):
                     sni = reality.get("serverName")
@@ -119,11 +178,43 @@ def parse_xray_node(content, default_name, node_index):
                 if xhttp_settings.get("mode"):
                     mode = xhttp_settings.get("mode")
         except Exception as e:
-            print(f"  [-] 解析错误，使用标准容灾参数: {e}")
+            print(f"  [-] 解析失败，使用原生标准结构: {e}")
 
-    # 1. 生成兼容 Android Karing / Clash Meta 的 YAML 对象
+    # 如果无法提取原生结构，则按原生模板构建
+    if not raw_outbound:
+        raw_outbound = {
+            "tag": node_tag,
+            "protocol": "vless",
+            "settings": {
+                "vnext": [{
+                    "address": server,
+                    "port": port,
+                    "users": [{
+                        "id": uuid,
+                        "encryption": encryption,
+                        "flow": flow
+                    }]
+                }]
+            },
+            "streamSettings": {
+                "network": "xhttp",
+                "security": "reality",
+                "realitySettings": {
+                    "serverName": sni,
+                    "fingerprint": fingerprint,
+                    "publicKey": public_key,
+                    "shortId": short_id
+                },
+                "xhttpSettings": {
+                    "path": path,
+                    "mode": mode
+                }
+            }
+        }
+
+    # 1. Clash Meta / Karing 兼容结构
     clash_proxy = {
-        "name": default_name,
+        "name": node_name,
         "type": "vless",
         "server": server,
         "port": port,
@@ -131,30 +222,33 @@ def parse_xray_node(content, default_name, node_index):
         "udp": True,
         "tls": True,
         "skip-cert-verify": True,
-        "flow": flow,
         "servername": sni,
         "client-fingerprint": fingerprint,
         "alpn": ["h2"],
-        "network": "splithttp",
+        "network": "xhttp",
         "reality-opts": {
             "public-key": public_key,
             "short-id": short_id
-        },
-        "splithttp-opts": {
-            "path": path,
-            "mode": mode,
-            "headers": {"Host": sni}
         },
         "xhttp-opts": {
             "path": path,
             "mode": mode,
             "headers": {"Host": sni}
+        },
+        "splithttp-opts": {
+            "path": path,
+            "mode": mode,
+            "headers": {"Host": sni}
         }
     }
+    if flow:
+        clash_proxy["flow"] = flow
 
-    # 2. 生成标准通用 VLESS URI (全面兼容各客户端直接导入)
+    # 2. 原生 VLESS URI 链接
+    is_ipv6 = ":" in server
+    uri_server = f"[{server}]" if is_ipv6 else server
     encoded_path = quote(path, safe="")
-    query_parts = [
+    q_parts = [
         "security=reality",
         "encryption=none",
         f"pbk={quote(public_key)}",
@@ -167,14 +261,13 @@ def parse_xray_node(content, default_name, node_index):
         f"mode={quote(mode)}",
     ]
     if flow:
-        query_parts.append(f"flow={quote(flow)}")
+        q_parts.append(f"flow={quote(flow)}")
+    vless_uri = f"vless://{uuid}@{uri_server}:{port}?" + "&".join(q_parts) + f"#{quote(node_name)}"
 
-    uri = f"vless://{uuid}@{server}:{port}?" + "&".join(query_parts) + f"#{quote(default_name)}"
-
-    # 3. 生成 Sing-Box 格式配置
+    # 3. Sing-Box 结构
     singbox_node = {
         "type": "vless",
-        "tag": default_name,
+        "tag": node_name,
         "server": server,
         "server_port": port,
         "uuid": uuid,
@@ -200,7 +293,7 @@ def parse_xray_node(content, default_name, node_index):
         }
     }
 
-    return clash_proxy, uri, singbox_node
+    return raw_outbound, clash_proxy, vless_uri, singbox_node
 
 def dump_yaml_proxies(proxies):
     """序列化为完整兼容的 Clash Meta YAML"""
@@ -220,31 +313,31 @@ def dump_yaml_proxies(proxies):
         lines.append(f"    client-fingerprint: \"{p.get('client-fingerprint', 'chrome')}\"")
         lines.append(f"    alpn:")
         lines.append(f"      - h2")
-        lines.append(f"    network: {p.get('network', 'splithttp')}")
+        lines.append(f"    network: {p.get('network', 'xhttp')}")
         
         if "reality-opts" in p:
             lines.append("    reality-opts:")
             lines.append(f"      public-key: \"{p['reality-opts'].get('public-key', '')}\"")
             lines.append(f"      short-id: \"{p['reality-opts'].get('short-id', '')}\"")
             
-        if "splithttp-opts" in p:
-            lines.append("    splithttp-opts:")
-            lines.append(f"      path: \"{p['splithttp-opts'].get('path', '/OCrp5Ajs')}\"")
-            lines.append(f"      mode: \"{p['splithttp-opts'].get('mode', 'auto')}\"")
-            lines.append("      headers:")
-            lines.append(f"        Host: \"{p.get('servername', 'www.yahoo.com')}\"")
-
         if "xhttp-opts" in p:
             lines.append("    xhttp-opts:")
             lines.append(f"      path: \"{p['xhttp-opts'].get('path', '/OCrp5Ajs')}\"")
             lines.append(f"      mode: \"{p['xhttp-opts'].get('mode', 'auto')}\"")
             lines.append("      headers:")
             lines.append(f"        Host: \"{p.get('servername', 'www.yahoo.com')}\"")
+
+        if "splithttp-opts" in p:
+            lines.append("    splithttp-opts:")
+            lines.append(f"      path: \"{p['splithttp-opts'].get('path', '/OCrp5Ajs')}\"")
+            lines.append(f"      mode: \"{p['splithttp-opts'].get('mode', 'auto')}\"")
+            lines.append("      headers:")
+            lines.append(f"        Host: \"{p.get('servername', 'www.yahoo.com')}\"")
             
     return "\n".join(lines)
 
-def render_template(template_str, proxies):
-    """渲染完整订阅配置"""
+def render_yaml_template(template_str, proxies):
+    """渲染完整 Clash Meta 订阅配置"""
     if not proxies:
         return template_str.replace("{{proxies}}", "  # 暂无可用节点\n").replace("{{proxy_names_indented}}", "      - DIRECT")
 
@@ -262,44 +355,59 @@ def render_template(template_str, proxies):
 
 def main():
     print("=" * 65)
-    print("🚀 开始运行 GitHub 8 个 Xray 节点全量提取与 Karing 适配生成工作流")
+    print("🚀 开始严格按原生配置模板从 8 个 URL 提取并生成 8 个原生节点")
     print("=" * 65)
 
     urls = extract_all_urls(URLS_FILE)
-    print(f"[*] 从 urls.txt 成功提取到 {len(urls)} 个 URL 链接")
+    print(f"[*] 从 urls.txt 读取到 {len(urls)} 个节点 URL 源")
 
-    all_clash_proxies = []
-    all_uris = []
-    all_singbox_nodes = []
-    first_raw_json = None
+    raw_outbounds_list = []
+    clash_proxies_list = []
+    vless_uris_list = []
+    singbox_nodes_list = []
 
     for idx, u in enumerate(urls, 1):
-        node_name = f"Xray-VLESS-{idx:02d}"
-        print(f"[*] 正在拉取第 {idx} 个节点配置 ({node_name}): {u}")
+        print(f"[*] 正在拉取第 {idx}/8 个节点源: {u}")
         content = fetch_upstream_content(u)
 
-        if content and not first_raw_json:
-            try:
-                first_raw_json = json.loads(content)
-            except Exception:
-                pass
+        raw_ob, clash_p, v_uri, sb_n = parse_node_details(content, idx)
+        raw_outbounds_list.append(raw_ob)
+        clash_proxies_list.append(clash_p)
+        vless_uris_list.append(v_uri)
+        singbox_nodes_list.append(sb_n)
 
-        clash_p, uri, singbox_n = parse_xray_node(content, node_name, idx)
-        if clash_p:
-            all_clash_proxies.append(clash_p)
-            all_uris.append(uri)
-            all_singbox_nodes.append(singbox_n)
-            print(f"  [√] 成功生成节点: {node_name} ➔ {clash_p['server']}:{clash_p['port']} (Network: {clash_p.get('network')}, SNI: {clash_p.get('servername')})")
+        server_addr = clash_p["server"]
+        port_num = clash_p["port"]
+        print(f"  [√] 节点 {idx:02d} 生成成功 ➔ {server_addr}:{port_num} ({clash_p['name']})")
 
-    print(f"\n[=] 总计成功生成 {len(all_clash_proxies)} 个完整可用 Xray 节点！")
+    print(f"\n[=] 成功生成全部 {len(clash_proxies_list)} 个独立节点！")
 
-    # 1. 写入明文链接 (xray_links.txt)
-    uris_text = "\n".join(all_uris)
+    # 1. 严格按照原生配置模板生成完整 Xray 配置 (xray_config.json)
+    full_xray_config = copy.deepcopy(NATIVE_XRAY_TEMPLATE)
+    full_xray_config["outbounds"] = copy.deepcopy(raw_outbounds_list)
+    full_xray_config["outbounds"].append({ "tag": "direct", "protocol": "freedom" })
+    full_xray_config["outbounds"].append({ "tag": "block", "protocol": "blackhole" })
+    
+    with open(XRAY_CONFIG_JSON, "w", encoding="utf-8") as f:
+        json.dump(full_xray_config, f, ensure_ascii=False, indent=2)
+    print(f"[√] 已严格按照原生模板写入完整配置: {XRAY_CONFIG_JSON}")
+
+    # 同时为需要单独使用单节点的场景，输出 xray_1.json ~ xray_8.json
+    for i, ob in enumerate(raw_outbounds_list, 1):
+        single_xray = copy.deepcopy(NATIVE_XRAY_TEMPLATE)
+        single_xray["outbounds"] = [copy.deepcopy(ob), { "tag": "direct", "protocol": "freedom" }, { "tag": "block", "protocol": "blackhole" }]
+        single_xray["routing"]["rules"][-1]["outboundTag"] = ob["tag"]
+        single_path = os.path.join(BASE_DIR, f"xray_{i}.json")
+        with open(single_path, "w", encoding="utf-8") as f:
+            json.dump(single_xray, f, ensure_ascii=False, indent=2)
+
+    # 2. 写入原生 VLESS 明文链接清单 (xray_links.txt)
+    uris_text = "\n".join(vless_uris_list)
     with open(XRAY_LINKS_TXT, "w", encoding="utf-8") as f:
         f.write(uris_text + "\n")
-    print(f"[√] 已写入 URI 链接清单: {XRAY_LINKS_TXT}")
+    print(f"[√] 已写入原生明文链接清单: {XRAY_LINKS_TXT}")
 
-    # 2. 写入 Base64 通用订阅 (sub.txt & config.b64)
+    # 3. 写入 Base64 通用订阅 (sub.txt & config.b64)
     b64_content = base64.b64encode(uris_text.encode("utf-8")).decode("utf-8") if uris_text else ""
     with open(SUB_OUTPUT, "w", encoding="utf-8") as f:
         f.write(b64_content + "\n")
@@ -307,72 +415,28 @@ def main():
         f.write(b64_content + "\n")
     print(f"[√] 已写入 Base64 订阅: {SUB_OUTPUT}")
 
-    # 3. 写入完整 Clash Meta / Karing 订阅 (config.yaml & clash.yaml)
-    if os.path.exists(TEMPLATE_FILE):
-        with open(TEMPLATE_FILE, "r", encoding="utf-8") as f:
-            template_content = f.read()
+    # 4. 写入完整 Clash Meta / Karing 订阅 (config.yaml & clash.yaml)
+    if os.path.exists(TEMPLATE_YAML_FILE):
+        with open(TEMPLATE_YAML_FILE, "r", encoding="utf-8") as f:
+            tpl_str = f.read()
 
-        rendered_yaml = render_template(template_content, all_clash_proxies)
+        rendered_yaml = render_yaml_template(tpl_str, clash_proxies_list)
         with open(CONFIG_YAML, "w", encoding="utf-8") as f:
             f.write(rendered_yaml)
         with open(CLASH_OUTPUT, "w", encoding="utf-8") as f:
             f.write(rendered_yaml)
-        print(f"[√] 已写入完整 Clash Meta / Karing 订阅: {CONFIG_YAML}")
-
-    # 4. 写入原生 Xray 客户端完整配置 (xray_config.json)
-    try:
-        xray_client_config = first_raw_json if first_raw_json else {
-            "log": {"loglevel": "warning"},
-            "inbounds": [
-                {"tag": "socks", "port": 1080, "listen": "127.0.0.1", "protocol": "socks", "settings": {"auth": "noauth", "udp": True}},
-                {"tag": "http", "port": 1081, "listen": "127.0.0.1", "protocol": "http", "settings": {"auth": "noauth"}}
-            ],
-            "outbounds": [
-                {
-                    "tag": "proxy",
-                    "protocol": "vless",
-                    "settings": {
-                        "vnext": [{
-                            "address": all_clash_proxies[0]["server"],
-                            "port": all_clash_proxies[0]["port"],
-                            "users": [{"id": all_clash_proxies[0]["uuid"]}]
-                        }]
-                    },
-                    "streamSettings": {
-                        "network": "xhttp",
-                        "security": "reality",
-                        "realitySettings": {
-                            "serverName": all_clash_proxies[0].get("servername", "www.yahoo.com"),
-                            "fingerprint": all_clash_proxies[0].get("client-fingerprint", "chrome"),
-                            "publicKey": all_clash_proxies[0].get("reality-opts", {}).get("public-key", ""),
-                            "shortId": all_clash_proxies[0].get("reality-opts", {}).get("short-id", "")
-                        },
-                        "xhttpSettings": {
-                            "path": all_clash_proxies[0].get("xhttp-opts", {}).get("path", "/OCrp5Ajs"),
-                            "mode": all_clash_proxies[0].get("xhttp-opts", {}).get("mode", "auto")
-                        }
-                    }
-                },
-                {"tag": "direct", "protocol": "freedom"},
-                {"tag": "block", "protocol": "blackhole"}
-            ]
-        }
-        with open(XRAY_CONFIG_JSON, "w", encoding="utf-8") as f:
-            json.dump(xray_client_config, f, ensure_ascii=False, indent=2)
-        print(f"[√] 已写入原生 Xray 客户端配置: {XRAY_CONFIG_JSON}")
-    except Exception as e:
-        print(f"[!] 生成 Xray JSON 失败: {e}")
+        print(f"[√] 已写入 Clash Meta / Karing 订阅: {CONFIG_YAML}")
 
     # 5. 写入 Sing-Box 格式配置 (singbox.json)
     try:
         with open(SINGBOX_OUTPUT, "w", encoding="utf-8") as f:
-            json.dump({"outbounds": all_singbox_nodes}, f, ensure_ascii=False, indent=2)
-        print(f"[√] 已写入 Sing-Box 格式: {SINGBOX_OUTPUT}")
+            json.dump({"outbounds": singbox_nodes_list}, f, ensure_ascii=False, indent=2)
+        print(f"[√] 已写入 Sing-Box 配置: {SINGBOX_OUTPUT}")
     except Exception as e:
         print(f"[!] 生成 Sing-Box 失败: {e}")
 
     print("=" * 65)
-    print(f"✨ 成功提取并生成 {len(all_clash_proxies)} 个完整可用 Xray 节点！")
+    print("✨ 全部 8 个节点与原生配置模板生成完毕！")
     print("=" * 65)
 
 if __name__ == "__main__":

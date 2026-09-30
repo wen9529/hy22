@@ -59,7 +59,7 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           
           # 暂存所有自动生成的 Xray 订阅与节点文件
-          git add config.yaml config.b64 clash.yaml xray_config.json xray_links.txt singbox.json sub.txt 2>/dev/null || true
+          git add config.yaml config.b64 clash.yaml xray_config.json xray_*.json xray_links.txt singbox.json sub.txt 2>/dev/null || true
           
           # 删除旧版遗留的 hy2 订阅文件
           git rm -f hy2_config.yaml hy2_config.b64 hy2_links.txt 2>/dev/null || true

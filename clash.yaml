@@ -53,16 +53,16 @@ proxies:
     client-fingerprint: "chrome"
     alpn:
       - h2
-    network: splithttp
+    network: xhttp
     reality-opts:
       public-key: "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg"
       short-id: "21569dd6"
-    splithttp-opts:
+    xhttp-opts:
       path: "/OCrp5Ajs"
       mode: "auto"
       headers:
         Host: "www.yahoo.com"
-    xhttp-opts:
+    splithttp-opts:
       path: "/OCrp5Ajs"
       mode: "auto"
       headers:
@@ -79,16 +79,16 @@ proxies:
     client-fingerprint: "chrome"
     alpn:
       - h2
-    network: splithttp
+    network: xhttp
     reality-opts:
       public-key: "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg"
       short-id: "21569dd6"
-    splithttp-opts:
+    xhttp-opts:
       path: "/OCrp5Ajs"
       mode: "auto"
       headers:
         Host: "www.yahoo.com"
-    xhttp-opts:
+    splithttp-opts:
       path: "/OCrp5Ajs"
       mode: "auto"
       headers:
@@ -105,16 +105,16 @@ proxies:
     client-fingerprint: "chrome"
     alpn:
       - h2
-    network: splithttp
+    network: xhttp
     reality-opts:
       public-key: "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg"
       short-id: "21569dd6"
-    splithttp-opts:
+    xhttp-opts:
       path: "/OCrp5Ajs"
       mode: "auto"
       headers:
         Host: "www.yahoo.com"
-    xhttp-opts:
+    splithttp-opts:
       path: "/OCrp5Ajs"
       mode: "auto"
       headers:
@@ -131,23 +131,23 @@ proxies:
     client-fingerprint: "chrome"
     alpn:
       - h2
-    network: splithttp
+    network: xhttp
     reality-opts:
       public-key: "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg"
       short-id: "21569dd6"
-    splithttp-opts:
+    xhttp-opts:
       path: "/OCrp5Ajs"
       mode: "auto"
       headers:
         Host: "www.yahoo.com"
-    xhttp-opts:
+    splithttp-opts:
       path: "/OCrp5Ajs"
       mode: "auto"
       headers:
         Host: "www.yahoo.com"
   - name: "Xray-VLESS-05"
     type: vless
-    server: "62.210.70.194"
+    server: "2001:bc8:32d7:302::14"
     port: 37783
     uuid: "a289c660-1b12-432b-a06c-c2ae469272b0"
     udp: true
@@ -157,23 +157,23 @@ proxies:
     client-fingerprint: "chrome"
     alpn:
       - h2
-    network: splithttp
+    network: xhttp
     reality-opts:
       public-key: "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg"
       short-id: "21569dd6"
-    splithttp-opts:
+    xhttp-opts:
       path: "/OCrp5Ajs"
       mode: "auto"
       headers:
         Host: "www.yahoo.com"
-    xhttp-opts:
+    splithttp-opts:
       path: "/OCrp5Ajs"
       mode: "auto"
       headers:
         Host: "www.yahoo.com"
   - name: "Xray-VLESS-06"
     type: vless
-    server: "62.210.70.194"
+    server: "2001:bc8:32d7:302::14"
     port: 37783
     uuid: "a289c660-1b12-432b-a06c-c2ae469272b0"
     udp: true
@@ -183,23 +183,23 @@ proxies:
     client-fingerprint: "chrome"
     alpn:
       - h2
-    network: splithttp
+    network: xhttp
     reality-opts:
       public-key: "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg"
       short-id: "21569dd6"
-    splithttp-opts:
+    xhttp-opts:
       path: "/OCrp5Ajs"
       mode: "auto"
       headers:
         Host: "www.yahoo.com"
-    xhttp-opts:
+    splithttp-opts:
       path: "/OCrp5Ajs"
       mode: "auto"
       headers:
         Host: "www.yahoo.com"
   - name: "Xray-VLESS-07"
     type: vless
-    server: "62.210.70.194"
+    server: "2001:bc8:32d7:302::14"
     port: 37783
     uuid: "a289c660-1b12-432b-a06c-c2ae469272b0"
     udp: true
@@ -209,23 +209,23 @@ proxies:
     client-fingerprint: "chrome"
     alpn:
       - h2
-    network: splithttp
+    network: xhttp
     reality-opts:
       public-key: "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg"
       short-id: "21569dd6"
-    splithttp-opts:
+    xhttp-opts:
       path: "/OCrp5Ajs"
       mode: "auto"
       headers:
         Host: "www.yahoo.com"
-    xhttp-opts:
+    splithttp-opts:
       path: "/OCrp5Ajs"
       mode: "auto"
       headers:
         Host: "www.yahoo.com"
   - name: "Xray-VLESS-08"
     type: vless
-    server: "62.210.70.194"
+    server: "2001:bc8:32d7:302::14"
     port: 37783
     uuid: "a289c660-1b12-432b-a06c-c2ae469272b0"
     udp: true
@@ -235,16 +235,16 @@ proxies:
     client-fingerprint: "chrome"
     alpn:
       - h2
-    network: splithttp
+    network: xhttp
     reality-opts:
       public-key: "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg"
       short-id: "21569dd6"
-    splithttp-opts:
+    xhttp-opts:
       path: "/OCrp5Ajs"
       mode: "auto"
       headers:
         Host: "www.yahoo.com"
-    xhttp-opts:
+    splithttp-opts:
       path: "/OCrp5Ajs"
       mode: "auto"
       headers:
