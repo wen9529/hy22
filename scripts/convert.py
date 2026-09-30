@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-GitHub Actions 自动化转换脚本：
-严格按照原生 Xray 配置模板，从 8 个 URL 获取真实节点配置，精准生成 8 个原生节点与各端订阅：
-1. 原生多节点与独立配置 (xray_config.json 及 xray_1~8.json)；
-2. 标准 Clash Meta / Karing 订阅 (config.yaml 与 clash.yaml)；
-3. 通用标准 VLESS 明文链接 (xray_links.txt)；
-4. 通用 Base64 订阅 (sub.txt 与 config.b64)；
-5. Sing-Box 原生配置 (singbox.json)。
+GitHub Actions 自动化转换脚本 (全端双核双兼容终极版)：
+1. 解决 Karing (Sing-Box 内核) 添加 xray_config.json 时报错 "singbox outbounds: No server available" 的问题；
+2. 在 JSON outbound 中同时注入 Sing-Box 核心字段 (type, server, server_port, tls, transport) 与 Xray 核心字段 (protocol, settings.vnext, streamSettings)；
+3. 输出完整兼容的 config.yaml, clash.yaml, singbox.json, xray_config.json, xray_links.txt, sub.txt。
 """
 
 import os
@@ -36,7 +33,7 @@ SUB_OUTPUT = os.path.join(BASE_DIR, "sub.txt")
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
 TIMEOUT = 8
 
-# 用户提供的原生标准 Xray 完整配置模板
+# 用户标准原生 Xray 完整配置模板
 NATIVE_XRAY_TEMPLATE = {
     "log": { "loglevel": "warning" },
     "dns": {
@@ -83,7 +80,7 @@ NATIVE_XRAY_TEMPLATE = {
         "rules": [
             { "type": "field", "outboundTag": "block", "ip": ["geoip:private"] },
             { "type": "field", "outboundTag": "direct", "domain": ["geosite:private"] },
-            { "type": "field", "outboundTag": "proxy-01", "port": "0-65535" }
+            { "type": "field", "outboundTag": "Xray-VLESS-01", "port": "0-65535" }
         ]
     }
 }
@@ -120,11 +117,10 @@ def fetch_upstream_content(url):
     return None
 
 def parse_node_details(content, idx):
-    """严格解析原生 Xray 配置中的 outbound 节点完整参数"""
-    node_tag = f"proxy-{idx:02d}"
+    """解析节点参数，并构建同时兼容 Sing-Box 与 Xray 的双核 outbound"""
     node_name = f"Xray-VLESS-{idx:02d}"
 
-    # 默认回退值
+    # 默认值
     server = "62.210.70.194" if idx <= 4 else "2001:bc8:32d7:302::14"
     port = 37783
     uuid = "a289c660-1b12-432b-a06c-c2ae469272b0"
@@ -137,17 +133,12 @@ def parse_node_details(content, idx):
     path = "/OCrp5Ajs"
     mode = "auto"
 
-    raw_outbound = None
-
     if content:
         try:
             data = json.loads(content)
             outbounds = data.get("outbounds", [])
             if outbounds:
                 ob = outbounds[0]
-                raw_outbound = copy.deepcopy(ob)
-                raw_outbound["tag"] = node_tag
-
                 settings = ob.get("settings", {})
                 vnext = settings.get("vnext", [])
                 if vnext and len(vnext) > 0:
@@ -178,41 +169,71 @@ def parse_node_details(content, idx):
                 if xhttp_settings.get("mode"):
                     mode = xhttp_settings.get("mode")
         except Exception as e:
-            print(f"  [-] 解析失败，使用原生标准结构: {e}")
+            print(f"  [-] 解析错误，使用标准参数: {e}")
 
-    # 如果无法提取原生结构，则按原生模板构建
-    if not raw_outbound:
-        raw_outbound = {
-            "tag": node_tag,
-            "protocol": "vless",
-            "settings": {
-                "vnext": [{
-                    "address": server,
-                    "port": port,
-                    "users": [{
-                        "id": uuid,
-                        "encryption": encryption,
-                        "flow": flow
-                    }]
-                }]
+    # =========================================================================
+    # 1. 双核混合 Outbound 对象 (针对 xray_config.json)
+    #    让 Karing(Sing-Box内核) 与 Xray-core 均可直接解析本 JSON 并提取节点！
+    # =========================================================================
+    dual_outbound = {
+        "tag": node_name,
+        # --- Sing-Box 核心识别字段 (彻底解决 No server available) ---
+        "type": "vless",
+        "server": server,
+        "server_port": port,
+        "uuid": uuid,
+        "flow": flow,
+        "tls": {
+            "enabled": True,
+            "server_name": sni,
+            "insecure": True,
+            "utls": {
+                "enabled": True,
+                "fingerprint": fingerprint
             },
-            "streamSettings": {
-                "network": "xhttp",
-                "security": "reality",
-                "realitySettings": {
-                    "serverName": sni,
-                    "fingerprint": fingerprint,
-                    "publicKey": public_key,
-                    "shortId": short_id
-                },
-                "xhttpSettings": {
-                    "path": path,
-                    "mode": mode
-                }
+            "reality": {
+                "enabled": True,
+                "public_key": public_key,
+                "short_id": short_id
+            }
+        },
+        "transport": {
+            "type": "http",
+            "path": path,
+            "host": [sni]
+        },
+        # --- Xray-core 原生识别字段 (原生 Xray 执行) ---
+        "protocol": "vless",
+        "settings": {
+            "vnext": [{
+                "address": server,
+                "port": port,
+                "users": [{
+                    "id": uuid,
+                    "encryption": encryption,
+                    "flow": flow
+                }]
+            }]
+        },
+        "streamSettings": {
+            "network": "xhttp",
+            "security": "reality",
+            "realitySettings": {
+                "serverName": sni,
+                "fingerprint": fingerprint,
+                "publicKey": public_key,
+                "shortId": short_id
+            },
+            "xhttpSettings": {
+                "path": path,
+                "mode": mode
             }
         }
+    }
 
-    # 1. Clash Meta / Karing 兼容结构
+    # =========================================================================
+    # 2. Clash Meta / Karing 核心配置
+    # =========================================================================
     clash_proxy = {
         "name": node_name,
         "type": "vless",
@@ -244,7 +265,9 @@ def parse_node_details(content, idx):
     if flow:
         clash_proxy["flow"] = flow
 
-    # 2. 原生 VLESS URI 链接
+    # =========================================================================
+    # 3. 标准通用 VLESS URI 链接
+    # =========================================================================
     is_ipv6 = ":" in server
     uri_server = f"[{server}]" if is_ipv6 else server
     encoded_path = quote(path, safe="")
@@ -264,7 +287,9 @@ def parse_node_details(content, idx):
         q_parts.append(f"flow={quote(flow)}")
     vless_uri = f"vless://{uuid}@{uri_server}:{port}?" + "&".join(q_parts) + f"#{quote(node_name)}"
 
-    # 3. Sing-Box 结构
+    # =========================================================================
+    # 4. 纯净 Sing-Box 格式配置
+    # =========================================================================
     singbox_node = {
         "type": "vless",
         "tag": node_name,
@@ -293,7 +318,7 @@ def parse_node_details(content, idx):
         }
     }
 
-    return raw_outbound, clash_proxy, vless_uri, singbox_node
+    return dual_outbound, clash_proxy, vless_uri, singbox_node
 
 def dump_yaml_proxies(proxies):
     """序列化为完整兼容的 Clash Meta YAML"""
@@ -355,13 +380,13 @@ def render_yaml_template(template_str, proxies):
 
 def main():
     print("=" * 65)
-    print("🚀 开始严格按原生配置模板从 8 个 URL 提取并生成 8 个原生节点")
+    print("🚀 开始运行多核双向兼容转换工作流 (覆盖 Karing/Sing-Box 与 Xray)")
     print("=" * 65)
 
     urls = extract_all_urls(URLS_FILE)
     print(f"[*] 从 urls.txt 读取到 {len(urls)} 个节点 URL 源")
 
-    raw_outbounds_list = []
+    dual_outbounds_list = []
     clash_proxies_list = []
     vless_uris_list = []
     singbox_nodes_list = []
@@ -370,8 +395,8 @@ def main():
         print(f"[*] 正在拉取第 {idx}/8 个节点源: {u}")
         content = fetch_upstream_content(u)
 
-        raw_ob, clash_p, v_uri, sb_n = parse_node_details(content, idx)
-        raw_outbounds_list.append(raw_ob)
+        dual_ob, clash_p, v_uri, sb_n = parse_node_details(content, idx)
+        dual_outbounds_list.append(dual_ob)
         clash_proxies_list.append(clash_p)
         vless_uris_list.append(v_uri)
         singbox_nodes_list.append(sb_n)
@@ -380,26 +405,17 @@ def main():
         port_num = clash_p["port"]
         print(f"  [√] 节点 {idx:02d} 生成成功 ➔ {server_addr}:{port_num} ({clash_p['name']})")
 
-    print(f"\n[=] 成功生成全部 {len(clash_proxies_list)} 个独立节点！")
+    print(f"\n[=] 成功生成全部 {len(clash_proxies_list)} 个双核兼容节点！")
 
     # 1. 严格按照原生配置模板生成完整 Xray 配置 (xray_config.json)
     full_xray_config = copy.deepcopy(NATIVE_XRAY_TEMPLATE)
-    full_xray_config["outbounds"] = copy.deepcopy(raw_outbounds_list)
+    full_xray_config["outbounds"] = copy.deepcopy(dual_outbounds_list)
     full_xray_config["outbounds"].append({ "tag": "direct", "protocol": "freedom" })
     full_xray_config["outbounds"].append({ "tag": "block", "protocol": "blackhole" })
     
     with open(XRAY_CONFIG_JSON, "w", encoding="utf-8") as f:
         json.dump(full_xray_config, f, ensure_ascii=False, indent=2)
-    print(f"[√] 已严格按照原生模板写入完整配置: {XRAY_CONFIG_JSON}")
-
-    # 同时为需要单独使用单节点的场景，输出 xray_1.json ~ xray_8.json
-    for i, ob in enumerate(raw_outbounds_list, 1):
-        single_xray = copy.deepcopy(NATIVE_XRAY_TEMPLATE)
-        single_xray["outbounds"] = [copy.deepcopy(ob), { "tag": "direct", "protocol": "freedom" }, { "tag": "block", "protocol": "blackhole" }]
-        single_xray["routing"]["rules"][-1]["outboundTag"] = ob["tag"]
-        single_path = os.path.join(BASE_DIR, f"xray_{i}.json")
-        with open(single_path, "w", encoding="utf-8") as f:
-            json.dump(single_xray, f, ensure_ascii=False, indent=2)
+    print(f"[√] 已写入双核兼容原生配置: {XRAY_CONFIG_JSON}")
 
     # 2. 写入原生 VLESS 明文链接清单 (xray_links.txt)
     uris_text = "\n".join(vless_uris_list)
@@ -427,16 +443,16 @@ def main():
             f.write(rendered_yaml)
         print(f"[√] 已写入 Clash Meta / Karing 订阅: {CONFIG_YAML}")
 
-    # 5. 写入 Sing-Box 格式配置 (singbox.json)
+    # 5. 写入纯净 Sing-Box 格式配置 (singbox.json)
     try:
         with open(SINGBOX_OUTPUT, "w", encoding="utf-8") as f:
             json.dump({"outbounds": singbox_nodes_list}, f, ensure_ascii=False, indent=2)
-        print(f"[√] 已写入 Sing-Box 配置: {SINGBOX_OUTPUT}")
+        print(f"[√] 已写入纯净 Sing-Box 配置: {SINGBOX_OUTPUT}")
     except Exception as e:
         print(f"[!] 生成 Sing-Box 失败: {e}")
 
     print("=" * 65)
-    print("✨ 全部 8 个节点与原生配置模板生成完毕！")
+    print("✨ 全部 8 个节点双核兼容生成完毕！")
     print("=" * 65)
 
 if __name__ == "__main__":
