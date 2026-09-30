@@ -1,8 +1,8 @@
-hy2://dongtaiwang.com@62.210.70.191:22000/?sni=www.microsoft.com&insecure=1#Hysteria2-01
-hy2://dongtaiwang.com@www.838491.xyz:13377/?sni=www.838491.xyz&insecure=1#Hysteria2-02
-hy2://dongtaiwang.com@62.210.70.191:22000/?sni=www.microsoft.com&insecure=1#Hysteria2-03
-hy2://dongtaiwang.com@www.838491.xyz:13377/?sni=www.838491.xyz&insecure=1#Hysteria2-04
-hy2://dongtaiwang.com@62.210.70.191:22000/?sni=www.microsoft.com&insecure=1#Hysteria2-05
-hy2://dongtaiwang.com@www.838491.xyz:13377/?sni=www.838491.xyz&insecure=1#Hysteria2-06
-hy2://dongtaiwang.com@62.210.70.191:22000/?sni=www.microsoft.com&insecure=1#Hysteria2-07
-hy2://dongtaiwang.com@www.838491.xyz:13377/?sni=www.838491.xyz&insecure=1#Hysteria2-08
+hy2://dongtaiwang.com@[2001:bc8:32d7:17b::3]:22000/?sni=www.microsoft.com&insecure=1#Hysteria2-01
+hy2://dongtaiwang.com@[2001:bc8:32d7:17b::3]:22000/?sni=www.microsoft.com&insecure=1#Hysteria2-02
+hy2://dongtaiwang.com@[2001:bc8:32d7:17b::3]:22000/?sni=www.microsoft.com&insecure=1#Hysteria2-03
+hy2://dongtaiwang.com@[2001:bc8:32d7:17b::3]:22000/?sni=www.microsoft.com&insecure=1#Hysteria2-04
+hy2://dongtaiwang.com@[2001:bc8:32d7:17b::3]:22000/?sni=www.microsoft.com&insecure=1#Hysteria2-05
+hy2://dongtaiwang.com@[2001:bc8:32d7:17b::3]:22000/?sni=www.microsoft.com&insecure=1#Hysteria2-06
+hy2://dongtaiwang.com@[2001:bc8:32d7:17b::3]:22000/?sni=www.microsoft.com&insecure=1#Hysteria2-07
+hy2://dongtaiwang.com@[2001:bc8:32d7:17b::3]:22000/?sni=www.microsoft.com&insecure=1#Hysteria2-08
