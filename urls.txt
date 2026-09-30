@@ -1,17 +1,12 @@
-# 4 个批处理脚本提取的 8 个 Xray 节点配置源 (对应 8 个独立节点)
+# 官方活跃订阅配置源 (作者当前实时维护与更新)
+https://gitlab.com/zhifan999/fq/-/raw/main/android.yaml
 
-# 文档 1 (节点 1 & 节点 2)
+# 备用历史源 (已停更)
 https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ip/xray/1/config.json
 https://www.67867867.xyz/Alvin9999/PAC/refs/heads/master/backup/img/1/2/ip/xray/1/config.json
-
-# 文档 2 (节点 3 & 节点 4)
 https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ip/xray/2/config.json
 https://www.67867867.xyz/Alvin9999/PAC/refs/heads/master/backup/img/1/2/ip/xray/2/config.json
-
-# 文档 3 (节点 5 & 节点 6)
 https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ip/xray/3/config.json
 https://www.67867867.xyz/Alvin9999/PAC/refs/heads/master/backup/img/1/2/ip/xray/3/config.json
-
-# 文档 4 (节点 7 & 节点 8)
 https://gitlab.com/free9999/ipupdate/-/raw/master/backup/img/1/2/ip/xray/4/config.json
 https://www.67867867.xyz/Alvin9999/PAC/refs/heads/master/backup/img/1/2/ip/xray/4/config.json

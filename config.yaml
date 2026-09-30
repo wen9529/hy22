@@ -29,240 +29,69 @@ dns:
     geoip-code: CN
 
 proxies:
-  - name: "Xray-VLESS-01"
+  - name: "美国1-Reality-Vision"
     type: vless
-    server: "62.210.70.194"
-    port: 37783
-    uuid: "a289c660-1b12-432b-a06c-c2ae469272b0"
-    udp: true
+    server: 137.175.82.41
+    port: 30556
+    uuid: 949d278e-6d98-4014-84e9-59f1c6c93e0e
+    network: tcp
     tls: true
-    skip-cert-verify: true
-    servername: "www.yahoo.com"
-    client-fingerprint: "chrome"
+    udp: true
+    flow: xtls-rprx-vision
+    servername: www.lovelive-anime.jp
+    client-fingerprint: chrome
+    reality-opts:
+      public-key: EcmNQqZxyW4GCEQF-7nH54w3qgBkLzsfqFSgafGjB0E
+      short-id: d082f567
+
+  - name: "美国2-anytls"
+    type: anytls
+    server: anytls.864106.xyz
+    port: 18001
+    password: "fanvpn.net"
+    sni: anytls.864106.xyz
+
+  - name: "美国3-mieru"
+    type: mieru
+    server: 137.175.82.41
+    port: 28899
+    transport: "TCP"
+    username: "fanvpn.net"
+    password: "fanvpn.net"
+    multiplexing: "MULTIPLEXING_LOW"
+
+  - name: "法国-anytls"
+    type: anytls
+    server: 62.210.7.249
+    port: 11780
+    password: "fanvpn.net"
+    udp: true
+    idle-session-check-interval: 30
+    idle-session-timeout: 30
+    min-idle-session: 5
+    sni: bing.com
     alpn:
       - h2
-    network: xhttp
-    reality-opts:
-      public-key: "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg"
-      short-id: "21569dd6"
-    xhttp-opts:
-      path: "/OCrp5Ajs"
-      mode: "auto"
-      headers:
-        Host: "www.yahoo.com"
-    splithttp-opts:
-      path: "/OCrp5Ajs"
-      mode: "auto"
-      headers:
-        Host: "www.yahoo.com"
-  - name: "Xray-VLESS-02"
-    type: vless
-    server: "62.210.70.194"
-    port: 37783
-    uuid: "a289c660-1b12-432b-a06c-c2ae469272b0"
-    udp: true
-    tls: true
+      - http/1.1
     skip-cert-verify: true
-    servername: "www.yahoo.com"
-    client-fingerprint: "chrome"
-    alpn:
-      - h2
-    network: xhttp
-    reality-opts:
-      public-key: "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg"
-      short-id: "21569dd6"
-    xhttp-opts:
-      path: "/OCrp5Ajs"
-      mode: "auto"
-      headers:
-        Host: "www.yahoo.com"
-    splithttp-opts:
-      path: "/OCrp5Ajs"
-      mode: "auto"
-      headers:
-        Host: "www.yahoo.com"
-  - name: "Xray-VLESS-03"
-    type: vless
-    server: "62.210.70.194"
-    port: 37783
-    uuid: "a289c660-1b12-432b-a06c-c2ae469272b0"
-    udp: true
-    tls: true
-    skip-cert-verify: true
-    servername: "www.yahoo.com"
-    client-fingerprint: "chrome"
-    alpn:
-      - h2
-    network: xhttp
-    reality-opts:
-      public-key: "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg"
-      short-id: "21569dd6"
-    xhttp-opts:
-      path: "/OCrp5Ajs"
-      mode: "auto"
-      headers:
-        Host: "www.yahoo.com"
-    splithttp-opts:
-      path: "/OCrp5Ajs"
-      mode: "auto"
-      headers:
-        Host: "www.yahoo.com"
-  - name: "Xray-VLESS-04"
-    type: vless
-    server: "62.210.70.194"
-    port: 37783
-    uuid: "a289c660-1b12-432b-a06c-c2ae469272b0"
-    udp: true
-    tls: true
-    skip-cert-verify: true
-    servername: "www.yahoo.com"
-    client-fingerprint: "chrome"
-    alpn:
-      - h2
-    network: xhttp
-    reality-opts:
-      public-key: "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg"
-      short-id: "21569dd6"
-    xhttp-opts:
-      path: "/OCrp5Ajs"
-      mode: "auto"
-      headers:
-        Host: "www.yahoo.com"
-    splithttp-opts:
-      path: "/OCrp5Ajs"
-      mode: "auto"
-      headers:
-        Host: "www.yahoo.com"
-  - name: "Xray-VLESS-05"
-    type: vless
-    server: "2001:bc8:32d7:302::14"
-    port: 37783
-    uuid: "a289c660-1b12-432b-a06c-c2ae469272b0"
-    udp: true
-    tls: true
-    skip-cert-verify: true
-    servername: "www.yahoo.com"
-    client-fingerprint: "chrome"
-    alpn:
-      - h2
-    network: xhttp
-    reality-opts:
-      public-key: "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg"
-      short-id: "21569dd6"
-    xhttp-opts:
-      path: "/OCrp5Ajs"
-      mode: "auto"
-      headers:
-        Host: "www.yahoo.com"
-    splithttp-opts:
-      path: "/OCrp5Ajs"
-      mode: "auto"
-      headers:
-        Host: "www.yahoo.com"
-  - name: "Xray-VLESS-06"
-    type: vless
-    server: "2001:bc8:32d7:302::14"
-    port: 37783
-    uuid: "a289c660-1b12-432b-a06c-c2ae469272b0"
-    udp: true
-    tls: true
-    skip-cert-verify: true
-    servername: "www.yahoo.com"
-    client-fingerprint: "chrome"
-    alpn:
-      - h2
-    network: xhttp
-    reality-opts:
-      public-key: "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg"
-      short-id: "21569dd6"
-    xhttp-opts:
-      path: "/OCrp5Ajs"
-      mode: "auto"
-      headers:
-        Host: "www.yahoo.com"
-    splithttp-opts:
-      path: "/OCrp5Ajs"
-      mode: "auto"
-      headers:
-        Host: "www.yahoo.com"
-  - name: "Xray-VLESS-07"
-    type: vless
-    server: "2001:bc8:32d7:302::14"
-    port: 37783
-    uuid: "a289c660-1b12-432b-a06c-c2ae469272b0"
-    udp: true
-    tls: true
-    skip-cert-verify: true
-    servername: "www.yahoo.com"
-    client-fingerprint: "chrome"
-    alpn:
-      - h2
-    network: xhttp
-    reality-opts:
-      public-key: "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg"
-      short-id: "21569dd6"
-    xhttp-opts:
-      path: "/OCrp5Ajs"
-      mode: "auto"
-      headers:
-        Host: "www.yahoo.com"
-    splithttp-opts:
-      path: "/OCrp5Ajs"
-      mode: "auto"
-      headers:
-        Host: "www.yahoo.com"
-  - name: "Xray-VLESS-08"
-    type: vless
-    server: "2001:bc8:32d7:302::14"
-    port: 37783
-    uuid: "a289c660-1b12-432b-a06c-c2ae469272b0"
-    udp: true
-    tls: true
-    skip-cert-verify: true
-    servername: "www.yahoo.com"
-    client-fingerprint: "chrome"
-    alpn:
-      - h2
-    network: xhttp
-    reality-opts:
-      public-key: "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg"
-      short-id: "21569dd6"
-    xhttp-opts:
-      path: "/OCrp5Ajs"
-      mode: "auto"
-      headers:
-        Host: "www.yahoo.com"
-    splithttp-opts:
-      path: "/OCrp5Ajs"
-      mode: "auto"
-      headers:
-        Host: "www.yahoo.com"
 
 proxy-groups:
   - name: "PROXY"
     type: select
     proxies:
       - "智能选择"
-      - "Xray-VLESS-01"
-      - "Xray-VLESS-02"
-      - "Xray-VLESS-03"
-      - "Xray-VLESS-04"
-      - "Xray-VLESS-05"
-      - "Xray-VLESS-06"
-      - "Xray-VLESS-07"
-      - "Xray-VLESS-08"
+      - "美国1-Reality-Vision"
+      - "美国2-anytls"
+      - "美国3-mieru"
+      - "法国-anytls"
 
   - name: "智能选择"
     type: url-test
     proxies:
-      - "Xray-VLESS-01"
-      - "Xray-VLESS-02"
-      - "Xray-VLESS-03"
-      - "Xray-VLESS-04"
-      - "Xray-VLESS-05"
-      - "Xray-VLESS-06"
-      - "Xray-VLESS-07"
-      - "Xray-VLESS-08"
+      - "美国1-Reality-Vision"
+      - "美国2-anytls"
+      - "美国3-mieru"
+      - "法国-anytls"
     url: "https://cp.cloudflare.com/generate_204"
     interval: 300
     tolerance: 50

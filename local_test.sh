@@ -9,5 +9,5 @@ python3 -m pip install requests pyyaml
 python3 scripts/convert.py
 
 echo "==================================================="
-echo "执行完毕！已生成 config.yaml, hy2_config.yaml, hy2_links.txt 等文件。"
+echo "执行完毕！已生成 config.yaml, clash.yaml, singbox.json, xray_config.json, xray_links.txt 等文件。"
 echo "==================================================="

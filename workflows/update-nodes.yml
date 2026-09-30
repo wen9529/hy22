@@ -1,12 +1,15 @@
 name: 自动提取节点并生成全套订阅
 
 on:
+  # 1. 只要仓库有任何文件被修改/更新提交，即自动触发运行
   push:
     branches:
       - main
       - master
+  # 2. 定时计划任务：每周日 00:00 UTC (北京时间周日早上 8:00) 自动运行一次
   schedule:
     - cron: '0 0 * * 0'
+  # 3. 手动触发：支持在 GitHub 仓库 Actions 页面一键点击运行
   workflow_dispatch:
     inputs:
       force_update:
@@ -59,7 +62,7 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           
           # 暂存所有自动生成的 Xray 订阅与节点文件
-          git add config.yaml config.b64 clash.yaml xray_config.json xray_*.json xray_links.txt singbox.json sub.txt 2>/dev/null || true
+          git add config.yaml config.b64 clash.yaml xray_config.json xray_links.txt singbox.json sub.txt 2>/dev/null || true
           
           # 删除旧版遗留的 hy2 订阅文件
           git rm -f hy2_config.yaml hy2_config.b64 hy2_links.txt 2>/dev/null || true
@@ -85,5 +88,6 @@ jobs:
           curl -s "https://purge.jsdelivr.net/gh/${{ github.repository }}@main/clash.yaml" || true
           curl -s "https://purge.jsdelivr.net/gh/${{ github.repository }}@main/xray_config.json" || true
           curl -s "https://purge.jsdelivr.net/gh/${{ github.repository }}@main/xray_links.txt" || true
+          curl -s "https://purge.jsdelivr.net/gh/${{ github.repository }}@main/singbox.json" || true
           curl -s "https://purge.jsdelivr.net/gh/${{ github.repository }}@main/sub.txt" || true
           echo "jsDelivr 全球 CDN 缓存清理完成，订阅链接已生效！"

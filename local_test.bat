@@ -18,8 +18,9 @@ python scripts\convert.py
 echo.
 echo ===================================================
 echo 执行完毕！请检查生成的文件：
-echo - config.yaml
-echo - hy2_config.yaml
-echo - hy2_links.txt
+echo - config.yaml / clash.yaml
+echo - singbox.json
+echo - xray_config.json
+echo - xray_links.txt / sub.txt
 echo ===================================================
 pause
