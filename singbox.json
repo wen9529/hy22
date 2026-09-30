@@ -2,14 +2,14 @@
   "outbounds": [
     {
       "type": "vless",
-      "tag": "美国1-Reality-Vision",
-      "server": "137.175.82.41",
-      "server_port": 30556,
-      "uuid": "949d278e-6d98-4014-84e9-59f1c6c93e0e",
-      "flow": "xtls-rprx-vision",
+      "tag": "Xray-VLESS-01",
+      "server": "62.210.70.194",
+      "server_port": 37783,
+      "uuid": "a289c660-1b12-432b-a06c-c2ae469272b0",
+      "flow": "",
       "tls": {
         "enabled": true,
-        "server_name": "www.lovelive-anime.jp",
+        "server_name": "www.yahoo.com",
         "insecure": true,
         "utls": {
           "enabled": true,
@@ -17,9 +17,219 @@
         },
         "reality": {
           "enabled": true,
-          "public_key": "EcmNQqZxyW4GCEQF-7nH54w3qgBkLzsfqFSgafGjB0E",
-          "short_id": "d082f567"
+          "public_key": "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg",
+          "short_id": "21569dd6"
         }
+      },
+      "transport": {
+        "type": "http",
+        "path": "/OCrp5Ajs",
+        "host": [
+          "www.yahoo.com"
+        ]
+      }
+    },
+    {
+      "type": "vless",
+      "tag": "Xray-VLESS-02",
+      "server": "62.210.70.194",
+      "server_port": 37783,
+      "uuid": "a289c660-1b12-432b-a06c-c2ae469272b0",
+      "flow": "",
+      "tls": {
+        "enabled": true,
+        "server_name": "www.yahoo.com",
+        "insecure": true,
+        "utls": {
+          "enabled": true,
+          "fingerprint": "chrome"
+        },
+        "reality": {
+          "enabled": true,
+          "public_key": "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg",
+          "short_id": "21569dd6"
+        }
+      },
+      "transport": {
+        "type": "http",
+        "path": "/OCrp5Ajs",
+        "host": [
+          "www.yahoo.com"
+        ]
+      }
+    },
+    {
+      "type": "vless",
+      "tag": "Xray-VLESS-03",
+      "server": "62.210.70.194",
+      "server_port": 37783,
+      "uuid": "a289c660-1b12-432b-a06c-c2ae469272b0",
+      "flow": "",
+      "tls": {
+        "enabled": true,
+        "server_name": "www.yahoo.com",
+        "insecure": true,
+        "utls": {
+          "enabled": true,
+          "fingerprint": "chrome"
+        },
+        "reality": {
+          "enabled": true,
+          "public_key": "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg",
+          "short_id": "21569dd6"
+        }
+      },
+      "transport": {
+        "type": "http",
+        "path": "/OCrp5Ajs",
+        "host": [
+          "www.yahoo.com"
+        ]
+      }
+    },
+    {
+      "type": "vless",
+      "tag": "Xray-VLESS-04",
+      "server": "62.210.70.194",
+      "server_port": 37783,
+      "uuid": "a289c660-1b12-432b-a06c-c2ae469272b0",
+      "flow": "",
+      "tls": {
+        "enabled": true,
+        "server_name": "www.yahoo.com",
+        "insecure": true,
+        "utls": {
+          "enabled": true,
+          "fingerprint": "chrome"
+        },
+        "reality": {
+          "enabled": true,
+          "public_key": "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg",
+          "short_id": "21569dd6"
+        }
+      },
+      "transport": {
+        "type": "http",
+        "path": "/OCrp5Ajs",
+        "host": [
+          "www.yahoo.com"
+        ]
+      }
+    },
+    {
+      "type": "vless",
+      "tag": "Xray-VLESS-05",
+      "server": "2001:bc8:32d7:302::14",
+      "server_port": 37783,
+      "uuid": "a289c660-1b12-432b-a06c-c2ae469272b0",
+      "flow": "",
+      "tls": {
+        "enabled": true,
+        "server_name": "www.yahoo.com",
+        "insecure": true,
+        "utls": {
+          "enabled": true,
+          "fingerprint": "chrome"
+        },
+        "reality": {
+          "enabled": true,
+          "public_key": "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg",
+          "short_id": "21569dd6"
+        }
+      },
+      "transport": {
+        "type": "http",
+        "path": "/OCrp5Ajs",
+        "host": [
+          "www.yahoo.com"
+        ]
+      }
+    },
+    {
+      "type": "vless",
+      "tag": "Xray-VLESS-06",
+      "server": "2001:bc8:32d7:302::14",
+      "server_port": 37783,
+      "uuid": "a289c660-1b12-432b-a06c-c2ae469272b0",
+      "flow": "",
+      "tls": {
+        "enabled": true,
+        "server_name": "www.yahoo.com",
+        "insecure": true,
+        "utls": {
+          "enabled": true,
+          "fingerprint": "chrome"
+        },
+        "reality": {
+          "enabled": true,
+          "public_key": "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg",
+          "short_id": "21569dd6"
+        }
+      },
+      "transport": {
+        "type": "http",
+        "path": "/OCrp5Ajs",
+        "host": [
+          "www.yahoo.com"
+        ]
+      }
+    },
+    {
+      "type": "vless",
+      "tag": "Xray-VLESS-07",
+      "server": "2001:bc8:32d7:302::14",
+      "server_port": 37783,
+      "uuid": "a289c660-1b12-432b-a06c-c2ae469272b0",
+      "flow": "",
+      "tls": {
+        "enabled": true,
+        "server_name": "www.yahoo.com",
+        "insecure": true,
+        "utls": {
+          "enabled": true,
+          "fingerprint": "chrome"
+        },
+        "reality": {
+          "enabled": true,
+          "public_key": "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg",
+          "short_id": "21569dd6"
+        }
+      },
+      "transport": {
+        "type": "http",
+        "path": "/OCrp5Ajs",
+        "host": [
+          "www.yahoo.com"
+        ]
+      }
+    },
+    {
+      "type": "vless",
+      "tag": "Xray-VLESS-08",
+      "server": "2001:bc8:32d7:302::14",
+      "server_port": 37783,
+      "uuid": "a289c660-1b12-432b-a06c-c2ae469272b0",
+      "flow": "",
+      "tls": {
+        "enabled": true,
+        "server_name": "www.yahoo.com",
+        "insecure": true,
+        "utls": {
+          "enabled": true,
+          "fingerprint": "chrome"
+        },
+        "reality": {
+          "enabled": true,
+          "public_key": "tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg",
+          "short_id": "21569dd6"
+        }
+      },
+      "transport": {
+        "type": "http",
+        "path": "/OCrp5Ajs",
+        "host": [
+          "www.yahoo.com"
+        ]
       }
     }
   ]
