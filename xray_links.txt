@@ -6,3 +6,7 @@ vless://a289c660-1b12-432b-a06c-c2ae469272b0@[2001:bc8:32d7:302::14]:37783?type=
 vless://a289c660-1b12-432b-a06c-c2ae469272b0@[2001:bc8:32d7:302::14]:37783?type=xhttp&security=reality&pbk=tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg&fp=chrome&sni=www.yahoo.com&sid=21569dd6&path=%2FOCrp5Ajs&mode=auto#Xray-VLESS-06
 vless://a289c660-1b12-432b-a06c-c2ae469272b0@[2001:bc8:32d7:302::14]:37783?type=xhttp&security=reality&pbk=tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg&fp=chrome&sni=www.yahoo.com&sid=21569dd6&path=%2FOCrp5Ajs&mode=auto#Xray-VLESS-07
 vless://a289c660-1b12-432b-a06c-c2ae469272b0@[2001:bc8:32d7:302::14]:37783?type=xhttp&security=reality&pbk=tQeEamJmYVUUfjRLX7ETvMnPj4DrHzRhR5TI684oYgg&fp=chrome&sni=www.yahoo.com&sid=21569dd6&path=%2FOCrp5Ajs&mode=auto#Xray-VLESS-08
+hysteria://62.210.70.191:23556?auth=github.com/Alvin9999-newpac/fanqiang&sni=bing.com&insecure=1&protocol=udp#Hysteria-01
+hysteria://163.172.117.163:36699?auth=dongtaiwang.com&sni=bing.com&insecure=1&protocol=udp#Hysteria-02
+hysteria://62.210.70.191:23556?auth=github.com/Alvin9999-newpac/fanqiang&sni=bing.com&insecure=1&protocol=udp#Hysteria-03
+hysteria://62.210.70.191:23556?auth=github.com/Alvin9999-newpac/fanqiang&sni=bing.com&insecure=1&protocol=udp#Hysteria-04

@@ -1,26 +1,40 @@
 # -------------------------------------------------------------
-# Clash Meta (Mihomo) & Karing 自动订阅配置 (全端高兼容完美版)
+# Clash Meta (Mihomo) & Karing 自动订阅配置 (安卓/iOS/电脑全兼容完美版)
 # -------------------------------------------------------------
 mixed-port: 7890
 allow-lan: false
 mode: rule
 log-level: info
-ipv6: true
+ipv6: false
 unified-delay: true
 tcp-concurrent: true
 external-controller: 127.0.0.1:9090
 
 dns:
   enable: true
-  ipv6: true
+  ipv6: false
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  default-nameserver:
+    - 223.5.5.5
+    - 119.29.29.29
   nameserver:
     - 223.5.5.5
     - 119.29.29.29
+    - 180.76.76.76
+    - https://dns.alidns.com/dns-query
+  fallback:
     - 1.1.1.1
     - 8.8.8.8
-    - 2400:3200::1
+    - https://1.1.1.1/dns-query
+    - https://dns.google/dns-query
+  fallback-filter:
+    geoip: true
+    geoip-code: CN
+    ipcidr:
+      - 240.0.0.0/4
 
-# 节点配置列表 (自动注入完整参数)
+# 节点配置列表 (自动注入全部 Xray 与 Hysteria 节点)
 proxies:
 {{proxies}}
 
@@ -62,7 +76,7 @@ proxy-groups:
       - 🚀 节点选择
       - 🎯 全球直连
 
-# 分流规则 (精简高兼容，避免 Android/Karing 缺少 GeoSite 库报错)
+# 分流规则
 rules:
   - GEOIP,LAN,DIRECT,no-resolve
   - GEOIP,CN,DIRECT

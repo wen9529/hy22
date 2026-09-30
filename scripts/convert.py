@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-GitHub Actions 自动化转换脚本 (8 个独立 Xray 节点提取版)：
-1. 精准从 4 个批处理脚本中提取全部 8 个 URL 链接，生成 8 个独立 Xray (VLESS Reality) 节点；
-2. 完美生成全客户端通用的标准 VLESS 链接、Clash Meta (Mihomo) & Karing 订阅、Base64 通用订阅；
-3. 支持 GitHub Actions 自动化定时运行与提交。
+GitHub Actions 自动化转换脚本 (Xray + Hysteria 双协议全量提取与容灾版)：
+1. 提取 urls.txt 中的全部 Xray (VLESS Reality) 与 Hysteria 节点；
+2. 完美生成全客户端通用的 Clash Meta (Mihomo) & Karing 订阅 (config.yaml)；
+3. 包含 IPv4 (62.210.70.194、62.210.70.191、163.172.117.163) 与 IPv6 节点。
 """
 
 import os
@@ -33,7 +33,7 @@ USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTM
 TIMEOUT = 8
 
 def extract_all_urls(file_path):
-    """从 urls.txt 中逐行提取全部 8 个 URL"""
+    """从输入文档中逐行提取全部 URL 链接"""
     urls = []
     if os.path.exists(file_path):
         with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
@@ -49,7 +49,7 @@ def extract_all_urls(file_path):
     return urls
 
 def fetch_upstream_content(url):
-    """从 URL 动态下载最新的配置"""
+    """从真实 URL 动态下载最新的配置"""
     ctx = ssl.create_default_context()
     ctx.check_hostname = False
     ctx.verify_mode = ssl.CERT_NONE
@@ -64,7 +64,7 @@ def fetch_upstream_content(url):
     return None
 
 def parse_xray_node(content, default_name):
-    """从 Xray JSON 中解析 VLESS Reality 节点参数"""
+    """从 Xray config.json 中精准解析 VLESS Reality 节点"""
     if not content:
         return None, None, None
     
@@ -87,6 +87,7 @@ def parse_xray_node(content, default_name):
     if not proxy_ob:
         proxy_ob = outbounds[0]
     
+    proto = str(proxy_ob.get("protocol", "vless")).lower()
     settings = proxy_ob.get("settings", {})
     vnext = settings.get("vnext", [])
     
@@ -123,7 +124,7 @@ def parse_xray_node(content, default_name):
     is_ipv6 = ":" in server
     uri_server = f"[{server}]" if is_ipv6 else server
 
-    # 1. Clash Meta / Karing 配置项
+    # 1. 生成 Clash Meta (Mihomo) & Karing 字典
     clash_proxy = {
         "name": default_name,
         "type": "vless",
@@ -132,6 +133,7 @@ def parse_xray_node(content, default_name):
         "uuid": uuid,
         "udp": True,
         "tls": True,
+        "skip-cert-verify": True,
         "flow": flow,
         "servername": sni,
         "client-fingerprint": fingerprint,
@@ -157,7 +159,7 @@ def parse_xray_node(content, default_name):
             "grpc-service-name": stream.get("grpcSettings", {}).get("serviceName", "")
         }
 
-    # 2. 标准通用 VLESS URI (全面兼容各客户端)
+    # 2. 生成标准通用 VLESS URI 链接 (规范兼容所有客户端)
     encoded_path = quote(path, safe="")
     query_parts = [
         f"type={quote(network)}",
@@ -177,7 +179,7 @@ def parse_xray_node(content, default_name):
     
     uri = f"vless://{uuid}@{uri_server}:{port}?" + "&".join(query_parts) + f"#{quote(default_name)}"
 
-    # 3. Sing-Box 配置项
+    # 3. 生成 Sing-Box 结构
     singbox_node = {
         "type": "vless",
         "tag": default_name,
@@ -208,32 +210,108 @@ def parse_xray_node(content, default_name):
 
     return clash_proxy, uri, singbox_node
 
+def parse_yaml_node(content, default_name):
+    """从 Clash YAML 内容中解析出 Hysteria 1 代理节点"""
+    if not content or "proxies:" not in content:
+        return None, None, None
+    
+    proxies_idx = content.find("proxies:")
+    proxy_part = content[proxies_idx:]
+    end_idx = proxy_part.find("\nproxy-groups:")
+    if end_idx != -1:
+        proxy_part = proxy_part[:end_idx]
+
+    server_m = re.search(r"server:\s*['\"]?([^'\"\s\n]+)", proxy_part)
+    port_m = re.search(r"port:\s*(\d+)", proxy_part)
+    auth_m = re.search(r"(?:auth-str|auth|password):\s*['\"]?([^'\"\s\n]+)", proxy_part)
+    sni_m = re.search(r"sni:\s*['\"]?([^'\"\s\n]+)", proxy_part)
+    up_m = re.search(r"up:\s*['\"]?([^'\"\n]+)", proxy_part)
+    down_m = re.search(r"down:\s*['\"]?([^'\"\n]+)", proxy_part)
+
+    server = server_m.group(1).strip("[]") if server_m else "62.210.70.191"
+    port = int(port_m.group(1)) if port_m else 23556
+    auth = auth_m.group(1) if auth_m else "github.com/Alvin9999-newpac/fanqiang"
+    sni = sni_m.group(1) if sni_m else "bing.com"
+    up = up_m.group(1).strip() if up_m else "11 Mbps"
+    down = down_m.group(1).strip() if down_m else "55 Mbps"
+
+    is_ipv6 = ":" in server
+    uri_server = f"[{server}]" if is_ipv6 else server
+
+    proxy_dict = {
+        "name": default_name,
+        "type": "hysteria",
+        "server": server,
+        "port": port,
+        "auth-str": auth,
+        "sni": sni,
+        "skip-cert-verify": True,
+        "alpn": ["h3"],
+        "protocol": "udp",
+        "up": str(up),
+        "down": str(down),
+        "fast-open": True
+    }
+    uri = f"hysteria://{uri_server}:{port}?auth={quote(auth)}&sni={quote(sni)}&insecure=1&protocol=udp#{quote(default_name)}"
+    
+    up_num = int(re.findall(r"\d+", str(up))[0]) if re.findall(r"\d+", str(up)) else 11
+    down_num = int(re.findall(r"\d+", str(down))[0]) if re.findall(r"\d+", str(down)) else 55
+    singbox_node = {
+        "type": "hysteria",
+        "tag": default_name,
+        "server": server,
+        "server_port": port,
+        "auth_str": auth,
+        "tls": {
+            "enabled": True,
+            "server_name": sni,
+            "insecure": True,
+            "alpn": ["h3"]
+        },
+        "up_mbps": up_num,
+        "down_mbps": down_num
+    }
+    return proxy_dict, uri, singbox_node
+
 def dump_yaml_proxies(proxies):
-    """序列化为标准 Clash Meta YAML"""
+    """序列化为标准 Clash Meta YAML (支持 vless 与 hysteria)"""
     lines = []
     for p in proxies:
         lines.append(f"  - name: \"{p['name']}\"")
         lines.append(f"    type: {p['type']}")
         lines.append(f"    server: \"{p['server']}\"")
         lines.append(f"    port: {p['port']}")
-        lines.append(f"    uuid: \"{p['uuid']}\"")
-        lines.append(f"    udp: true")
-        lines.append(f"    tls: true")
-        if p.get("flow"):
-            lines.append(f"    flow: \"{p['flow']}\"")
-        lines.append(f"    servername: \"{p.get('servername', 'www.yahoo.com')}\"")
-        lines.append(f"    client-fingerprint: \"{p.get('client-fingerprint', 'chrome')}\"")
-        lines.append(f"    network: {p.get('network', 'xhttp')}")
         
-        if "reality-opts" in p:
-            lines.append("    reality-opts:")
-            lines.append(f"      public-key: \"{p['reality-opts'].get('public-key', '')}\"")
-            lines.append(f"      short-id: \"{p['reality-opts'].get('short-id', '')}\"")
+        if p["type"] == "vless":
+            lines.append(f"    uuid: \"{p['uuid']}\"")
+            lines.append(f"    udp: true")
+            lines.append(f"    tls: true")
+            lines.append(f"    skip-cert-verify: true")
+            if p.get("flow"):
+                lines.append(f"    flow: \"{p['flow']}\"")
+            lines.append(f"    servername: \"{p.get('servername', 'www.yahoo.com')}\"")
+            lines.append(f"    client-fingerprint: \"{p.get('client-fingerprint', 'chrome')}\"")
+            lines.append(f"    network: {p.get('network', 'xhttp')}")
             
-        if "xhttp-opts" in p:
-            lines.append("    xhttp-opts:")
-            lines.append(f"      path: \"{p['xhttp-opts'].get('path', '/OCrp5Ajs')}\"")
-            lines.append(f"      mode: \"{p['xhttp-opts'].get('mode', 'auto')}\"")
+            if "reality-opts" in p:
+                lines.append("    reality-opts:")
+                lines.append(f"      public-key: \"{p['reality-opts'].get('public-key', '')}\"")
+                lines.append(f"      short-id: \"{p['reality-opts'].get('short-id', '')}\"")
+                
+            if "xhttp-opts" in p:
+                lines.append("    xhttp-opts:")
+                lines.append(f"      path: \"{p['xhttp-opts'].get('path', '/OCrp5Ajs')}\"")
+                lines.append(f"      mode: \"{p['xhttp-opts'].get('mode', 'auto')}\"")
+        elif p["type"] == "hysteria":
+            lines.append(f"    auth-str: \"{p.get('auth-str', '')}\"")
+            lines.append(f"    sni: \"{p.get('sni', 'bing.com')}\"")
+            lines.append(f"    skip-cert-verify: true")
+            lines.append("    alpn:")
+            lines.append("      - h3")
+            lines.append("    protocol: udp")
+            lines.append(f"    up: \"{p.get('up', '11 Mbps')}\"")
+            lines.append(f"    down: \"{p.get('down', '55 Mbps')}\"")
+            lines.append("    fast-open: true")
             
     return "\n".join(lines)
 
@@ -256,7 +334,7 @@ def render_template(template_str, proxies):
 
 def main():
     print("=" * 65)
-    print("🚀 开始运行 GitHub 8 个 Xray (VLESS Reality) 节点全量提取工作流")
+    print("🚀 开始运行 GitHub 节点提取与 Clash Meta / Karing 订阅生成")
     print("=" * 65)
 
     urls = extract_all_urls(URLS_FILE)
@@ -267,14 +345,25 @@ def main():
     all_singbox_nodes = []
     first_raw_json = None
 
-    for idx, u in enumerate(urls, 1):
-        node_name = f"Xray-VLESS-{idx:02d}"
-        print(f"[*] 正在拉取第 {idx} 个节点配置 ({node_name}): {u}")
+    xray_idx = 0
+    hy_idx = 0
+
+    for u in urls:
+        is_xray = "/xray/" in u or u.endswith(".json")
+        is_hy = "/clash.meta2/" in u or u.endswith(".yaml")
+
+        if is_xray:
+            xray_idx += 1
+            node_name = f"Xray-VLESS-{xray_idx:02d}"
+        else:
+            hy_idx += 1
+            node_name = f"Hysteria-{hy_idx:02d}"
+
+        print(f"[*] 正在拉取 [{node_name}]: {u}")
         content = fetch_upstream_content(u)
 
-        if not content:
-            # 备用容灾默认节点
-            is_v6 = (idx >= 5)
+        if not content and is_xray:
+            is_v6 = (xray_idx >= 5)
             server_ip = "2001:bc8:32d7:302::14" if is_v6 else "62.210.70.194"
             content = json.dumps({
                 "outbounds": [{
@@ -300,20 +389,23 @@ def main():
                 }]
             })
 
-        if not first_raw_json:
-            try:
-                first_raw_json = json.loads(content)
-            except Exception:
-                pass
+        if is_xray:
+            if not first_raw_json and content:
+                try:
+                    first_raw_json = json.loads(content)
+                except Exception:
+                    pass
+            clash_p, uri, singbox_n = parse_xray_node(content, node_name)
+        else:
+            clash_p, uri, singbox_n = parse_yaml_node(content, node_name)
 
-        clash_p, uri, singbox_n = parse_xray_node(content, node_name)
         if clash_p:
             all_clash_proxies.append(clash_p)
             all_uris.append(uri)
             all_singbox_nodes.append(singbox_n)
-            print(f"  [√] 成功生成节点: {node_name} ➔ {clash_p['server']}:{clash_p['port']}")
+            print(f"  [√] 成功生成节点: {node_name} ➔ {clash_p['server']}:{clash_p['port']} ({clash_p['type']})")
 
-    print(f"\n[=] 总计成功生成 {len(all_clash_proxies)} 个完整 Xray 节点！")
+    print(f"\n[=] 总计成功生成 {len(all_clash_proxies)} 个完整可用节点！")
 
     # 1. 写入明文链接 (xray_links.txt)
     uris_text = "\n".join(all_uris)
@@ -327,7 +419,7 @@ def main():
         f.write(b64_content + "\n")
     with open(CONFIG_B64, "w", encoding="utf-8") as f:
         f.write(b64_content + "\n")
-    print(f"[√] 已写入 Base64 通用全端订阅: {SUB_OUTPUT}")
+    print(f"[√] 已写入 Base64 订阅: {SUB_OUTPUT}")
 
     # 3. 写入完整 Clash Meta / Karing 订阅 (config.yaml & clash.yaml)
     if os.path.exists(TEMPLATE_FILE):
@@ -394,7 +486,7 @@ def main():
         print(f"[!] 生成 Sing-Box 失败: {e}")
 
     print("=" * 65)
-    print(f"✨ 成功提取并生成 {len(all_clash_proxies)} 个完整 Xray 节点！")
+    print(f"✨ 成功提取并生成 {len(all_clash_proxies)} 个完整可用节点！")
     print("=" * 65)
 
 if __name__ == "__main__":

@@ -1,26 +1,40 @@
 # -------------------------------------------------------------
-# Clash Meta (Mihomo) & Karing 自动订阅配置 (全端高兼容完美版)
+# Clash Meta (Mihomo) & Karing 自动订阅配置 (安卓/iOS/电脑全兼容完美版)
 # -------------------------------------------------------------
 mixed-port: 7890
 allow-lan: false
 mode: rule
 log-level: info
-ipv6: true
+ipv6: false
 unified-delay: true
 tcp-concurrent: true
 external-controller: 127.0.0.1:9090
 
 dns:
   enable: true
-  ipv6: true
+  ipv6: false
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  default-nameserver:
+    - 223.5.5.5
+    - 119.29.29.29
   nameserver:
     - 223.5.5.5
     - 119.29.29.29
+    - 180.76.76.76
+    - https://dns.alidns.com/dns-query
+  fallback:
     - 1.1.1.1
     - 8.8.8.8
-    - 2400:3200::1
+    - https://1.1.1.1/dns-query
+    - https://dns.google/dns-query
+  fallback-filter:
+    geoip: true
+    geoip-code: CN
+    ipcidr:
+      - 240.0.0.0/4
 
-# 节点配置列表 (自动注入完整参数)
+# 节点配置列表 (自动注入全部 Xray 与 Hysteria 节点)
 proxies:
   - name: "Xray-VLESS-01"
     type: vless
@@ -29,6 +43,7 @@ proxies:
     uuid: "a289c660-1b12-432b-a06c-c2ae469272b0"
     udp: true
     tls: true
+    skip-cert-verify: true
     servername: "www.yahoo.com"
     client-fingerprint: "chrome"
     network: xhttp
@@ -45,6 +60,7 @@ proxies:
     uuid: "a289c660-1b12-432b-a06c-c2ae469272b0"
     udp: true
     tls: true
+    skip-cert-verify: true
     servername: "www.yahoo.com"
     client-fingerprint: "chrome"
     network: xhttp
@@ -61,6 +77,7 @@ proxies:
     uuid: "a289c660-1b12-432b-a06c-c2ae469272b0"
     udp: true
     tls: true
+    skip-cert-verify: true
     servername: "www.yahoo.com"
     client-fingerprint: "chrome"
     network: xhttp
@@ -77,6 +94,7 @@ proxies:
     uuid: "a289c660-1b12-432b-a06c-c2ae469272b0"
     udp: true
     tls: true
+    skip-cert-verify: true
     servername: "www.yahoo.com"
     client-fingerprint: "chrome"
     network: xhttp
@@ -93,6 +111,7 @@ proxies:
     uuid: "a289c660-1b12-432b-a06c-c2ae469272b0"
     udp: true
     tls: true
+    skip-cert-verify: true
     servername: "www.yahoo.com"
     client-fingerprint: "chrome"
     network: xhttp
@@ -109,6 +128,7 @@ proxies:
     uuid: "a289c660-1b12-432b-a06c-c2ae469272b0"
     udp: true
     tls: true
+    skip-cert-verify: true
     servername: "www.yahoo.com"
     client-fingerprint: "chrome"
     network: xhttp
@@ -125,6 +145,7 @@ proxies:
     uuid: "a289c660-1b12-432b-a06c-c2ae469272b0"
     udp: true
     tls: true
+    skip-cert-verify: true
     servername: "www.yahoo.com"
     client-fingerprint: "chrome"
     network: xhttp
@@ -141,6 +162,7 @@ proxies:
     uuid: "a289c660-1b12-432b-a06c-c2ae469272b0"
     udp: true
     tls: true
+    skip-cert-verify: true
     servername: "www.yahoo.com"
     client-fingerprint: "chrome"
     network: xhttp
@@ -150,6 +172,58 @@ proxies:
     xhttp-opts:
       path: "/OCrp5Ajs"
       mode: "auto"
+  - name: "Hysteria-01"
+    type: hysteria
+    server: "62.210.70.191"
+    port: 23556
+    auth-str: "github.com/Alvin9999-newpac/fanqiang"
+    sni: "bing.com"
+    skip-cert-verify: true
+    alpn:
+      - h3
+    protocol: udp
+    up: "11 Mbps"
+    down: "55 Mbps"
+    fast-open: true
+  - name: "Hysteria-02"
+    type: hysteria
+    server: "163.172.117.163"
+    port: 36699
+    auth-str: "dongtaiwang.com"
+    sni: "bing.com"
+    skip-cert-verify: true
+    alpn:
+      - h3
+    protocol: udp
+    up: "11 Mbps"
+    down: "55 Mbps"
+    fast-open: true
+  - name: "Hysteria-03"
+    type: hysteria
+    server: "62.210.70.191"
+    port: 23556
+    auth-str: "github.com/Alvin9999-newpac/fanqiang"
+    sni: "bing.com"
+    skip-cert-verify: true
+    alpn:
+      - h3
+    protocol: udp
+    up: "11 Mbps"
+    down: "55 Mbps"
+    fast-open: true
+  - name: "Hysteria-04"
+    type: hysteria
+    server: "62.210.70.191"
+    port: 23556
+    auth-str: "github.com/Alvin9999-newpac/fanqiang"
+    sni: "bing.com"
+    skip-cert-verify: true
+    alpn:
+      - h3
+    protocol: udp
+    up: "11 Mbps"
+    down: "55 Mbps"
+    fast-open: true
 
 # 策略组配置
 proxy-groups:
@@ -167,6 +241,10 @@ proxy-groups:
       - "Xray-VLESS-06"
       - "Xray-VLESS-07"
       - "Xray-VLESS-08"
+      - "Hysteria-01"
+      - "Hysteria-02"
+      - "Hysteria-03"
+      - "Hysteria-04"
 
   - name: ♻️ 自动选择
     type: url-test
@@ -182,6 +260,10 @@ proxy-groups:
       - "Xray-VLESS-06"
       - "Xray-VLESS-07"
       - "Xray-VLESS-08"
+      - "Hysteria-01"
+      - "Hysteria-02"
+      - "Hysteria-03"
+      - "Hysteria-04"
 
   - name: ⚖️ 负载均衡
     type: load-balance
@@ -197,6 +279,10 @@ proxy-groups:
       - "Xray-VLESS-06"
       - "Xray-VLESS-07"
       - "Xray-VLESS-08"
+      - "Hysteria-01"
+      - "Hysteria-02"
+      - "Hysteria-03"
+      - "Hysteria-04"
 
   - name: 🎯 全球直连
     type: select
@@ -210,7 +296,7 @@ proxy-groups:
       - 🚀 节点选择
       - 🎯 全球直连
 
-# 分流规则 (精简高兼容，避免 Android/Karing 缺少 GeoSite 库报错)
+# 分流规则
 rules:
   - GEOIP,LAN,DIRECT,no-resolve
   - GEOIP,CN,DIRECT

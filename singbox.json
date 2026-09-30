@@ -207,6 +207,74 @@
         "path": "/OCrp5Ajs",
         "mode": "auto"
       }
+    },
+    {
+      "type": "hysteria",
+      "tag": "Hysteria-01",
+      "server": "62.210.70.191",
+      "server_port": 23556,
+      "auth_str": "github.com/Alvin9999-newpac/fanqiang",
+      "tls": {
+        "enabled": true,
+        "server_name": "bing.com",
+        "insecure": true,
+        "alpn": [
+          "h3"
+        ]
+      },
+      "up_mbps": 11,
+      "down_mbps": 55
+    },
+    {
+      "type": "hysteria",
+      "tag": "Hysteria-02",
+      "server": "163.172.117.163",
+      "server_port": 36699,
+      "auth_str": "dongtaiwang.com",
+      "tls": {
+        "enabled": true,
+        "server_name": "bing.com",
+        "insecure": true,
+        "alpn": [
+          "h3"
+        ]
+      },
+      "up_mbps": 11,
+      "down_mbps": 55
+    },
+    {
+      "type": "hysteria",
+      "tag": "Hysteria-03",
+      "server": "62.210.70.191",
+      "server_port": 23556,
+      "auth_str": "github.com/Alvin9999-newpac/fanqiang",
+      "tls": {
+        "enabled": true,
+        "server_name": "bing.com",
+        "insecure": true,
+        "alpn": [
+          "h3"
+        ]
+      },
+      "up_mbps": 11,
+      "down_mbps": 55
+    },
+    {
+      "type": "hysteria",
+      "tag": "Hysteria-04",
+      "server": "62.210.70.191",
+      "server_port": 23556,
+      "auth_str": "github.com/Alvin9999-newpac/fanqiang",
+      "tls": {
+        "enabled": true,
+        "server_name": "bing.com",
+        "insecure": true,
+        "alpn": [
+          "h3"
+        ]
+      },
+      "up_mbps": 11,
+      "down_mbps": 55
     }
   ]
 }
