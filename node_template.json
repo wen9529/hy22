@@ -8,7 +8,7 @@
   },
   "tls": {
     "sni": "www.838491.xyz",
-    "insecure": false
+    "insecure": true
   },
   "quic": {
     "initStreamReceiveWindow": 16777216,

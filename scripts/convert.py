@@ -1,15 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-GitHub Actions 自动化转换脚本 (IPv4 模板适配版)：
-1. 按照用户指定的 IPv4 模板 (node_template.json) 修改并注入服务器地址、端口与 TLS 证书配置
-2. 采用 IPv4 域名 (www.838491.xyz:13377) 与 IPv4 直连 (62.210.8.122:13377)，彻底解决国内网络无 IPv6 无法连通的问题
-3. 按照 template.yaml 渲染并输出：
-   - config.yaml & clash.yaml (Clash Meta 完整分流配置，含自动测速与负载均衡)
-   - hy2_config.yaml (纯净 Hysteria 2 节点清单)
-   - hy2_links.txt (标准 hy2:// URI 清单，insecure=0)
-   - config.b64 & hy2_config.b64 & sub.txt (Base64 通用订阅)
-   - singbox.json (Sing-box 官方格式)
+GitHub Actions 自动化转换脚本 (全端高兼容优化版)：
+1. 按照 node_template.json 模板生成 IPv4 节点
+2. 开启 skip-cert-verify: true (避免 Android / Karing / Clash 客户端因自签名证书校验失败报错)
+3. 优化 mixed-port 端口机制，避免端口占用导致 Android 客户端 "Service is not running" 报错
+4. 输出全套配置文件：config.yaml, clash.yaml, hy2_config.yaml, hy2_links.txt, sub.txt, singbox.json
 """
 
 import os
@@ -54,7 +50,6 @@ SUB_OUTPUT = os.path.join(BASE_DIR, "sub.txt")
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
 TIMEOUT = 12
 
-# 默认用户指定的 IPv4 模板规范
 DEFAULT_TEMPLATE_DATA = {
     "server": "www.838491.xyz:13377",
     "ipv4": "62.210.8.122",
@@ -65,7 +60,7 @@ DEFAULT_TEMPLATE_DATA = {
     },
     "tls": {
         "sni": "www.838491.xyz",
-        "insecure": False
+        "insecure": True
     },
     "transport": {
         "udp": {
@@ -78,9 +73,10 @@ def load_node_template():
     if os.path.exists(NODE_TEMPLATE_FILE):
         try:
             with open(NODE_TEMPLATE_FILE, "r", encoding="utf-8") as f:
-                return json.load(f)
+                data = json.load(f)
+                return data
         except Exception as e:
-            print(f"[!] 读取 node_template.json 失败: {e}，使用内置默认模板")
+            print(f"[!] 读取 node_template.json 失败: {e}，使用默认模板")
     return DEFAULT_TEMPLATE_DATA
 
 def extract_node_items_from_files(file_paths):
@@ -124,7 +120,6 @@ def extract_node_items_from_files(file_paths):
             "fallback": None
         })
 
-    # 如果没有读取到任何 URL，默认提供 4 个标准节点编号
     if not items:
         for idx in range(1, 5):
             items.append({
@@ -137,11 +132,6 @@ def extract_node_items_from_files(file_paths):
     return items
 
 def build_clash_proxies_from_template(node_name, template_data):
-    """
-    根据 IPv4 模板生成标准 Clash Meta 节点：
-    1. 域名线路 (www.838491.xyz:13377)
-    2. IPv4 直连线路 (62.210.8.122:13377)
-    """
     server_str = template_data.get("server", "www.838491.xyz:13377")
     if ":" in server_str:
         host, port_str = server_str.split(":", 1)
@@ -154,7 +144,9 @@ def build_clash_proxies_from_template(node_name, template_data):
     auth = template_data.get("auth", "dongtaiwang.com")
     tls_info = template_data.get("tls", {})
     sni = tls_info.get("sni", host)
-    insecure = bool(tls_info.get("insecure", False)) # 严格按照模板为 false
+    
+    # 强制开启免校验证书，防止在移动端/Karing上出现 TLS 握手阻断
+    insecure = True
 
     bandwidth = template_data.get("bandwidth", {})
     up = bandwidth.get("up", "11 mbps")
@@ -178,7 +170,7 @@ def build_clash_proxies_from_template(node_name, template_data):
     }
     proxies.append(p_domain)
 
-    # 2. IPv4 直连纯 IP 线路 (防 DNS 污染与解析失败)
+    # 2. IPv4 直连线路 (防 DNS 污染与解析失败)
     if ipv4_direct and ipv4_direct != host:
         p_ipv4 = {
             "name": f"{node_name} [IPv4直连]",
@@ -210,18 +202,18 @@ def dump_yaml_proxies(proxies):
     
     lines = []
     for p in proxies:
-        lines.append(f"  - name: \"{p['name']}\"")
+        lines.append(f"  - name: {p['name']}")
         lines.append(f"    type: {p['type']}")
-        lines.append(f"    server: \"{p['server']}\"")
+        lines.append(f"    server: {p['server']}")
         lines.append(f"    port: {p['port']}")
-        lines.append(f"    password: \"{p['password']}\"")
-        lines.append(f"    sni: \"{p['sni']}\"")
+        lines.append(f"    password: {p['password']}")
+        lines.append(f"    sni: {p['sni']}")
         lines.append(f"    skip-cert-verify: {str(p['skip-cert-verify']).lower()}")
         lines.append("    alpn:")
         for a in p.get("alpn", ["h3"]):
-            lines.append(f"      - {a}")
-        lines.append(f"    up: \"{p['up']}\"")
-        lines.append(f"    down: \"{p['down']}\"")
+            lines.append(f"    - {a}")
+        lines.append(f"    up: {p['up']}")
+        lines.append(f"    down: {p['down']}")
         lines.append(f"    fast-open: {str(p.get('fast-open', True)).lower()}")
     return "\n".join(lines)
 
@@ -248,14 +240,13 @@ def render_template(template_str, proxies):
 
 def main():
     print("=" * 65)
-    print("🚀 开始运行 GitHub 节点生成工作流 (IPv4 模板适配版)")
+    print("🚀 开始运行 GitHub 节点生成工作流 (全端兼容版)")
     print("=" * 65)
 
     template_data = load_node_template()
     server_info = template_data.get("server", "www.838491.xyz:13377")
     ipv4_info = template_data.get("ipv4", "62.210.8.122")
     print(f"[*] 目标服务器: {server_info} (IPv4直连: {ipv4_info})")
-    print(f"[*] SNI: {template_data.get('tls', {}).get('sni')}, Insecure: {template_data.get('tls', {}).get('insecure')}")
 
     input_files = [URLS_HY2_FILE, URLS_FILE]
     items = extract_node_items_from_files(input_files)
@@ -264,7 +255,6 @@ def main():
     hy2_uris = []
 
     for item in items:
-        # 按照用户提供的 IPv4 模板修改与组装服务器地址端口
         proxies = build_clash_proxies_from_template(item["name"], template_data)
         for p in proxies:
             all_proxies.append(p)
@@ -329,7 +319,7 @@ def main():
                 "tls": {
                     "enabled": True,
                     "server_name": p.get("sni", p["server"]),
-                    "insecure": p.get("skip-cert-verify", False),
+                    "insecure": True,
                     "alpn": ["h3"]
                 },
                 "up_mbps": up_num,
@@ -342,7 +332,7 @@ def main():
         print(f"[!] 生成 Sing-Box 失败: {e}")
 
     print("=" * 65)
-    print("✨ 所有格式转换完成，包含全套 IPv4 优化节点！")
+    print("✨ 所有格式转换完成，包含全套高兼容 IPv4 节点！")
     print("=" * 65)
 
 if __name__ == "__main__":

@@ -1,13 +1,11 @@
 # -------------------------------------------------------------
-# Clash Meta (Mihomo) 自动订阅配置模板 (双栈 IPv4 / IPv6 全面优化版)
+# Clash Meta (Mihomo) & Karing 自动订阅配置 (移动端/桌面端全兼容版)
 # -------------------------------------------------------------
-port: 7890
-socks-port: 7891
 mixed-port: 7890
 allow-lan: false
 mode: rule
 log-level: info
-ipv6: true # 关键：开启 IPv6 支持，确保原生 IPv6 节点与双栈网络顺畅连接
+ipv6: true
 unified-delay: true
 tcp-concurrent: true
 external-controller: 127.0.0.1:9090
@@ -15,7 +13,6 @@ external-controller: 127.0.0.1:9090
 dns:
   enable: true
   ipv6: true
-  listen: 0.0.0.0:1053
   enhanced-mode: fake-ip
   fake-ip-range: 198.18.0.1/16
   nameserver:
@@ -26,7 +23,7 @@ dns:
     - 2400:3200::1
     - 2606:4700:4700::1111
 
-# 节点配置列表 (脚本自动从 URL 下载并注入)
+# 节点配置列表 (自动注入)
 proxies:
   - name: Hysteria2-01
     type: hysteria2
@@ -34,7 +31,7 @@ proxies:
     port: 13377
     password: dongtaiwang.com
     sni: www.838491.xyz
-    skip-cert-verify: false
+    skip-cert-verify: true
     alpn:
     - h3
     up: 11 mbps
@@ -46,7 +43,7 @@ proxies:
     port: 13377
     password: dongtaiwang.com
     sni: www.838491.xyz
-    skip-cert-verify: false
+    skip-cert-verify: true
     alpn:
     - h3
     up: 11 mbps
@@ -58,7 +55,7 @@ proxies:
     port: 13377
     password: dongtaiwang.com
     sni: www.838491.xyz
-    skip-cert-verify: false
+    skip-cert-verify: true
     alpn:
     - h3
     up: 11 mbps
@@ -70,7 +67,7 @@ proxies:
     port: 13377
     password: dongtaiwang.com
     sni: www.838491.xyz
-    skip-cert-verify: false
+    skip-cert-verify: true
     alpn:
     - h3
     up: 11 mbps
@@ -82,7 +79,7 @@ proxies:
     port: 13377
     password: dongtaiwang.com
     sni: www.838491.xyz
-    skip-cert-verify: false
+    skip-cert-verify: true
     alpn:
     - h3
     up: 11 mbps
@@ -94,7 +91,7 @@ proxies:
     port: 13377
     password: dongtaiwang.com
     sni: www.838491.xyz
-    skip-cert-verify: false
+    skip-cert-verify: true
     alpn:
     - h3
     up: 11 mbps
@@ -106,7 +103,7 @@ proxies:
     port: 13377
     password: dongtaiwang.com
     sni: www.838491.xyz
-    skip-cert-verify: false
+    skip-cert-verify: true
     alpn:
     - h3
     up: 11 mbps
@@ -118,7 +115,7 @@ proxies:
     port: 13377
     password: dongtaiwang.com
     sni: www.838491.xyz
-    skip-cert-verify: false
+    skip-cert-verify: true
     alpn:
     - h3
     up: 11 mbps

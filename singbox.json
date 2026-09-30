@@ -9,7 +9,7 @@
       "tls": {
         "enabled": true,
         "server_name": "www.838491.xyz",
-        "insecure": false,
+        "insecure": true,
         "alpn": [
           "h3"
         ]
@@ -26,7 +26,7 @@
       "tls": {
         "enabled": true,
         "server_name": "www.838491.xyz",
-        "insecure": false,
+        "insecure": true,
         "alpn": [
           "h3"
         ]
@@ -43,7 +43,7 @@
       "tls": {
         "enabled": true,
         "server_name": "www.838491.xyz",
-        "insecure": false,
+        "insecure": true,
         "alpn": [
           "h3"
         ]
@@ -60,7 +60,7 @@
       "tls": {
         "enabled": true,
         "server_name": "www.838491.xyz",
-        "insecure": false,
+        "insecure": true,
         "alpn": [
           "h3"
         ]
@@ -77,7 +77,7 @@
       "tls": {
         "enabled": true,
         "server_name": "www.838491.xyz",
-        "insecure": false,
+        "insecure": true,
         "alpn": [
           "h3"
         ]
@@ -94,7 +94,7 @@
       "tls": {
         "enabled": true,
         "server_name": "www.838491.xyz",
-        "insecure": false,
+        "insecure": true,
         "alpn": [
           "h3"
         ]
@@ -111,7 +111,7 @@
       "tls": {
         "enabled": true,
         "server_name": "www.838491.xyz",
-        "insecure": false,
+        "insecure": true,
         "alpn": [
           "h3"
         ]
@@ -128,7 +128,7 @@
       "tls": {
         "enabled": true,
         "server_name": "www.838491.xyz",
-        "insecure": false,
+        "insecure": true,
         "alpn": [
           "h3"
         ]
